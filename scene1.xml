@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <Scene FormatVersion="1">
 	<Boundaries>
-		<Bound Name="Eye" x="0" y="0" z="0" />
+		<Bound Name="Eye" value="0 0 -2" />
 		<Bound Name="Right" value="1 0 0" />
 		<Bound Name="Down" value = "0 -1 0"/>
 		<Bound Name="UpperLeftCorner" value="-1 1 1"/>

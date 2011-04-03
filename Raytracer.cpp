@@ -9,7 +9,6 @@
 #include <cmath>
 #include <iostream>
 
-
 //use this function to initialize raytracer each constructor
 void Raytracer::loadDefaultScene(){
 
@@ -27,25 +26,16 @@ void Raytracer::loadDefaultScene(){
 		_ambient = 0.05*Color(1,1,1);
 		
 		//KD-Tree objects
-		Material* mat1 = new Material();
-		Material* mat2 = new Material();
-		Material* mat3 = new Material();
-		Material* mat4 = new Material();
-		mat1->setColor(Color(1,0,0));
-		mat2->setColor(Color(0,1,0));		
-		mat3->setColor(Color(1,1,1));	
-		mat4->setColor(Color(0.0,0.0,0.3));
-		mat4->setSpecular(0.2);	
-		mat4->setShininess(64);
-
-		//Sphere* s = new Sphere(Vector3(0,0,4),1);
-		//s->setMaterial(mat1);
-		//_objects.push_back(s);//pointers because of polymorphism
-		
-		//s = new Sphere(Vector3(-4,0,10),3);
-		//s->setMaterial(mat2);
-		//_objects.push_back(s);//pointers because of polymorphism
-
+		Material mat1,mat2,mat3,mat4;
+		mat1.setColor(Color(1,0,0));
+		mat2.setColor(Color(0,1,0));		
+		mat3.setColor(Color(1,1,1));	
+		mat4.setColor(Color(0.0,0.0,0.3));
+		mat4.setSpecular(0.2);	
+		mat4.setShininess(64);
+		_materials["mat1"] = mat1;_materials["mat2"] = mat2;
+		_materials["mat3"] = mat3;_materials["mat4"] = mat4;
+	
 		Vector3 LUH(-1,-1,3);
 		Vector3 RUH(1,-1,3);
 		Vector3 ROH(1,1,3);
@@ -58,40 +48,40 @@ void Raytracer::loadDefaultScene(){
 		
 		//hinten
 		Triangle* t = new Triangle(LUH,ROH,RUH);
-		t->setMaterial(mat3);
+		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
 		
 		t = new Triangle(LUH,LOH,ROH);
-		t->setMaterial(mat3);
+		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
 
 		//links
 		t = new Triangle(LUV,LOH,LUH);
-		t->setMaterial(mat1);
+		t->setMaterial(&_materials["mat1"]);
 		_objects.push_back(t);//pointers because of polymorphism
 		t = new Triangle(LUV,LOV,LOH);
-		t->setMaterial(mat1);
+		t->setMaterial(&_materials["mat1"]);
 		_objects.push_back(t);//pointers because of polymorphism
 		//rechts
 		t = new Triangle(RUV,RUH,ROH);
-		t->setMaterial(mat2);
+		t->setMaterial(&_materials["mat2"]);
 		_objects.push_back(t);//pointers because of polymorphism
 		t = new Triangle(RUV,ROH,ROV);
-		t->setMaterial(mat2);
+		t->setMaterial(&_materials["mat2"]);
 		_objects.push_back(t);//pointers because of polymorphism
 
 		//unten
 		t = new Triangle(LUV,LUH,RUH);
-		t->setMaterial(mat3);
+		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
 		t = new Triangle(LUV,RUH,RUV);
-		t->setMaterial(mat3);
+		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
 
 
 				//new sphere
 		Sphere* s = new Sphere(Vector3(.3,-1+.3,2),0.3);
-		s->setMaterial(mat4);
+		s->setMaterial(&_materials["mat4"]);
 		_objects.push_back(s);//pointers because of polymorphism
 
 
@@ -114,15 +104,86 @@ void Raytracer::loadScene(const std::string &xmlfile){
         //getting general settings:
         pugi::xml_node child = doc.child("Scene").child("Boundaries");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
- 		for (pugi::xml_attribute_iterator ait = it->attributes_begin(); ait != it->attributes_end(); ++ait){
-			//if( ait->name() != std::string("Name"))
-				std::cout<<ait->name()<<": "<<ait->value()<<std::endl;
-			/*_eye = Vector3(ait->attribute("x").as_int(),
-					ait->attribute("x").as_int(),
-					ait->attribute("x").as_int()); */
+		pugi::xml_attribute_iterator ait = it->attributes_begin();
+		std::string name = ait->value();
+		if ( name == std::string("Eye") ){
+			++ait;
+			_eye = Vector3(ait->value());
+			std::cout<<"Eye = "<<_eye<<std::endl;
+ 		}
+		else if ( name == std::string("Right") ){
+			++ait;
+			_right = Vector3(ait->value());
+			std::cout<<"Right = "<<_right<<std::endl;
+ 		}
+		else if ( name == std::string("Down") ){
+			++ait;
+			_down = Vector3(ait->value());
+			std::cout<<"Down = "<<_down<<std::endl;
+ 		}
+		else if ( name == std::string("UpperLeftCorner") ){
+			++ait;
+			_upperLeftCorner = Vector3(ait->value());
+			std::cout<<"UpperLeftCorner = "<<_upperLeftCorner<<std::endl;
+ 		}
+		else if ( name == std::string("Width") ){
+			++ait;
+			_width = ait->as_float();
+			std::cout<<"Width = "<<_width<<std::endl;
 		}
+		else if ( name == std::string("Height") ){
+			++ait;
+			_height = ait->as_float();
+			std::cout<<"Height = "<<_height<<std::endl;
+		}
+		else if ( name == std::string("PixelPerUnit") ){
+			++ait;
+			_pixelPerUnit = ait->as_int();
+			std::cout<<"PixelPerUnit = "<<_pixelPerUnit<<std::endl;
+		}
+		else if ( name == std::string("SuperSampling") ){
+			++ait;
+			_superSampling = ait->as_int();
+			std::cout<<"SuperSampling = "<<_superSampling<<std::endl;
+		}
+		//additional settings:
+		_maxRayDepth = 4;	
+		_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
+		_tracedImage.setGamma(2.2);
 	}
-	
+	 
+
+	//getting light settings:
+        child = doc.child("Scene").child("Lights");
+	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
+		std::string type = it->attribute("Type").value();		
+		if(type == "ambient"){
+			_ambient = 0.05*Color(it->attribute("Color").value());
+			std::cout<<"ambient = "<<_ambient<<std::endl;		
+		}else if( type == "point"){
+			Vector3 lightpos(it->attribute("Position").value());
+			_lights.push_back(Lightsource(lightpos, it->attribute("Intensity").as_float(), 
+					Color(it->attribute("Color").value())));
+
+		}else{
+			std::cout<<"Warning: light of type "<<type<<" not supported!"<<std::endl;		
+		}
+
+	}
+
+	//getting materials:
+        child = doc.child("Scene").child("Materials");
+	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
+		std::string name = it->attribute("Name").value();		
+		Material tmpmat;
+		tmpmat.setColor(Color(it->attribute("Color").value()));
+		if( it->attribute("Specular") )
+			tmpmat.setSpecular(it->attribute("Specular").as_float());
+		if( it->attribute("Shininess") )
+			tmpmat.setShininess(it->attribute("Shininess").as_int());
+		_materials[name] = tmpmat;
+		std::cout<<"Added material "<<name<<std::endl;
+	}
 }
 
 

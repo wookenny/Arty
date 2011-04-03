@@ -13,6 +13,7 @@ private:
 public:
 
 //con'strs
+	Color(const std::string &str);
 	Color(real r=0, real g=0, real b=0){ _data[0]=r; _data[1]=g; _data[2]=b; }
 	Color(const Color &c){_data[0] = c._data[0]; _data[1] = c._data[1]; _data[2] = c._data[2];}
 	

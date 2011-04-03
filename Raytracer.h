@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+# include <boost/unordered_map.hpp>
 
 #include "common.h"
 #include "Obstacle.h"
@@ -32,6 +33,8 @@ class Raytracer{
 		//KD-Tree objects
 		std::vector<Obstacle*> _objects;//pointers because of polymorphism
 		std::vector<Lightsource> _lights;
+		boost::unordered_map<std::string, Material> _materials;
+
 		//gamma	?
 		
 		//ambient lightning	
