@@ -19,7 +19,7 @@ void Raytracer::loadDefaultScene(){
 		_width = 2.; //size of viewing window
 		_height = 2.;
 		_pixelPerUnit = 400;
-		_superSampling = 10;
+		_superSampling = 4;
 		_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
 		_tracedImage.setGamma(2.2);
 		_maxRayDepth = 4;	
@@ -36,45 +36,45 @@ void Raytracer::loadDefaultScene(){
 		_materials["mat1"] = mat1;_materials["mat2"] = mat2;
 		_materials["mat3"] = mat3;_materials["mat4"] = mat4;
 	
-		Vector3 LUH(-1,-1,3);
-		Vector3 RUH(1,-1,3);
-		Vector3 ROH(1,1,3);
-		Vector3 LOH(-1,1,3);
-		Vector3 LUV(-1,-1,1);
-		Vector3 RUV(1,-1,1);
-		Vector3 ROV(1,1,1);
-		Vector3 LOV(-1,1,1);
+		_vertices["LUH"] = Vector3(-1,-1,3);
+		_vertices["RUH"] = Vector3(1,-1,3);
+		_vertices["ROH"] = Vector3(1,1,3);
+		_vertices["LOH"] = Vector3(-1,1,3);
+		_vertices["LUV"] = Vector3(-1,-1,1);
+		_vertices["RUV"] = Vector3(1,-1,1);
+		_vertices["ROV"] = Vector3(1,1,1);
+		_vertices["LOV"] = Vector3(-1,1,1);
 		
 		
 		//hinten
-		Triangle* t = new Triangle(LUH,ROH,RUH);
+		Triangle* t = new Triangle(_vertices["LUH"],_vertices["ROH"],_vertices["RUH"]);
 		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
 		
-		t = new Triangle(LUH,LOH,ROH);
+		t = new Triangle(_vertices["LUH"],_vertices["LOH"],_vertices["ROH"]);
 		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
 
 		//links
-		t = new Triangle(LUV,LOH,LUH);
+		t = new Triangle(_vertices["LUV"],_vertices["LOH"],_vertices["LUH"]);
 		t->setMaterial(&_materials["mat1"]);
 		_objects.push_back(t);//pointers because of polymorphism
-		t = new Triangle(LUV,LOV,LOH);
+		t = new Triangle(_vertices["LUV"],_vertices["LOV"],_vertices["LOH"]);
 		t->setMaterial(&_materials["mat1"]);
 		_objects.push_back(t);//pointers because of polymorphism
 		//rechts
-		t = new Triangle(RUV,RUH,ROH);
+		t = new Triangle(_vertices["RUV"],_vertices["RUH"],_vertices["ROH"]);
 		t->setMaterial(&_materials["mat2"]);
 		_objects.push_back(t);//pointers because of polymorphism
-		t = new Triangle(RUV,ROH,ROV);
+		t = new Triangle(_vertices["RUV"],_vertices["ROH"],_vertices["ROV"]);
 		t->setMaterial(&_materials["mat2"]);
 		_objects.push_back(t);//pointers because of polymorphism
 
 		//unten
-		t = new Triangle(LUV,LUH,RUH);
+		t = new Triangle(_vertices["LUV"],_vertices["LUH"],_vertices["RUH"]);
 		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
-		t = new Triangle(LUV,RUH,RUV);
+		t = new Triangle(_vertices["LUV"],_vertices["RUH"],_vertices["RUV"]);
 		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
 
@@ -141,10 +141,10 @@ void Raytracer::loadScene(const std::string &xmlfile){
 			_pixelPerUnit = ait->as_int();
 			std::cout<<"PixelPerUnit = "<<_pixelPerUnit<<std::endl;
 		}
-		else if ( name == std::string("SuperSampling") ){
+		else if ( name == std::string("Supersampling") ){
 			++ait;
 			_superSampling = ait->as_int();
-			std::cout<<"SuperSampling = "<<_superSampling<<std::endl;
+			std::cout<<"Supersampling = "<<_superSampling<<std::endl;
 		}
 		//additional settings:
 		_maxRayDepth = 4;	
@@ -183,6 +183,43 @@ void Raytracer::loadScene(const std::string &xmlfile){
 			tmpmat.setShininess(it->attribute("Shininess").as_int());
 		_materials[name] = tmpmat;
 		std::cout<<"Added material "<<name<<std::endl;
+	}
+	
+	//get implicit objects 
+	child = doc.child("Scene").child("Geometry").child("Implicits");
+	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
+		std::string type = it->attribute("Type").value();
+		if(type == "Sphere"){	
+			Sphere* s = new Sphere( Vector3(it->attribute("Position").value()),
+						it->attribute("Radius").as_float());
+			
+			s->setMaterial(&_materials[it->attribute("Material").value()]);
+			_objects.push_back(s);//pointers because of polymorphism
+			std::cout<<"Added object of type "<<type<<std::endl;
+		}else{
+			std::cout<<"Warning: implicit object with type "<<type<<" not supported!"<<std::endl;		
+		}
+	}
+
+	//get vertices 
+	child = doc.child("Scene").child("Geometry").child("Points");
+	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
+		std::string name = it->attribute("Name").value();
+		_vertices[name] = Vector3(  it->attribute("Position").value() );
+		std::cout<<"Added point "<<name<<std::endl;
+	}
+
+	//get triangles
+	child = doc.child("Scene").child("Geometry").child("Triangles");
+	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
+		std::string name = it->attribute("Name").value();
+
+		Triangle *t = new Triangle( 	_vertices[it->attribute("A").value()],
+						_vertices[it->attribute("B").value()],
+						_vertices[it->attribute("C").value()]);
+		t->setMaterial(&_materials[ it->attribute("Material").value() ]);
+		_objects.push_back(t);
+		std::cout<<"Added triangle "<<name<<std::endl;
 	}
 }
 
@@ -248,7 +285,24 @@ void Raytracer::traceRays(const std::vector<PrimaryRayBundle>& rays){
 
 	TracingFunctor t_func( *this );
 	std::cout<< rays.size()<<" rays to trace"<<std::endl;
-	std::for_each(rays.begin(),rays.end(),t_func);	//serial version in <algorithm>	
+	
+	//std::for_each(rays.begin(),rays.end(),t_func);
+	std::cout<<"O% "; 
+	std::cout.flush();
+	int process = 0;
+	for(unsigned int i = 0; i<rays.size();++i){
+		int tmp = (int)(100.0*i/rays.size());
+		if (tmp!=process){
+			process = tmp;
+			std::cout<<"\r\r\r\r"<<process<<"%";
+			std::cout.flush();
+		}		
+		t_func(rays.at(i));	
+	}
+	std::cout<<std::endl;
+
+	std::cout<<"finished tracing!"<<std::endl;
+	//serial version in <algorithm>	
 	//__gnu_parallel::for_each(rays.begin(),rays.end(),t_func); //parallel version in	<parallel/algorithm>
 }
 

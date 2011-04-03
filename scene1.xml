@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <Scene FormatVersion="1">
 	<Boundaries>
-		<Bound Name="Eye" value="0 0 -2" />
+		<Bound Name="Eye" value="0.000023 0.00213 -2.000012" />
 		<Bound Name="Right" value="1 0 0" />
 		<Bound Name="Down" value = "0 -1 0"/>
 		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
 		<Bound Name="Width" value="2." />
 		<Bound Name="Height" value="2." />
 		<Bound Name="PixelPerUnit"  value="400" />
-		<Bound Name="Supersampling" value="10" />
+		<Bound Name="Supersampling" value="4" />
 	</Boundaries>
 
 	<Lights>
@@ -18,14 +18,14 @@
 
 	<Materials>
 		<Material Name="mat1" Color="1 0 0" />
-		<Material Name="mat2" Color="0 1 0" />
+		<Material Name="mat2" Color="1 1 0" />
 		<Material Name="mat3" Color="1 1 1" />
 		<Material Name="mat4" Color="0 0 0.3" Specular="0.2" Shininess="64"/>
 	</Materials>
 
 	<Geometry>
 		<Implicits>
-			<Object Name="Sphere1" Type="Sphere" Position=".3 -0.7 2" Radius="0.3" Material="mat1"/>
+			<Object Name="Sphere1" Type="Sphere" Position=".3 -0.7 2" Radius="0.3" Material="mat4"/>
 		</Implicits>
 		<Points>
 			<Point Name="LUH" Position="-1 -1 3"/>
