@@ -8,6 +8,8 @@
 /** compilieren mit -fopenmp **/
 #include <cmath>
 #include <iostream>
+#include <fstream>
+#include <boost/lexical_cast.hpp>
 
 //use this function to initialize raytracer each constructor
 void Raytracer::loadDefaultScene(){
@@ -221,6 +223,9 @@ void Raytracer::loadScene(const std::string &xmlfile){
 		_objects.push_back(t);
 		std::cout<<"Added triangle "<<name<<std::endl;
 	}
+
+	//TODO: test
+	loadOFF_File("teapot.off", 0,0,0,0,0,0);
 }
 
 
@@ -290,6 +295,7 @@ void Raytracer::traceRays(const std::vector<PrimaryRayBundle>& rays){
 	std::cout<<"O% "; 
 	std::cout.flush();
 	int process = 0;
+	#pragma omp parallel for
 	for(unsigned int i = 0; i<rays.size();++i){
 		int tmp = (int)(100.0*i/rays.size());
 		if (tmp!=process){
@@ -410,4 +416,88 @@ bool Raytracer::inShadow(const Vector3& coord, const Vector3& light) const{
 	}
 	return false;
 }		
+
+void Raytracer::loadOFF_File(const std::string &str, real x_min, real x_max, real y_min, real y_max, real z_min, real z_max){
+	//open file
+	std::ifstream file;
+	file.open(str.c_str());
+	std::string line;
+
+	//1th line: OFF
+	file >> line;	
+
+	//2th line: #vertices #faces #edges
+	file >> line;	
+	long numVertices = atol(line.c_str());
+	file >> line;	
+	long numFaces = atol(line.c_str());
+	file >> line;	
+	long numEdges = atol(line.c_str());
+	std::cout<< numVertices<<" "<< numFaces<<" "<< numEdges<<std::endl;
+	
+	//all vertices (x y z)
+	real x1,x2,y1,y2,z1,z2;
+	for(long i = 0; i<numVertices;++i){
+		real x,y,z;
+		file >> line; x = real(atof(line.c_str()));
+		file >> line; z = real(atof(line.c_str()));
+		file >> line; y = real(atof(line.c_str()));
+		std::cout<< "vertex: "<<x<<" "<<y<<" "<<z<<std::endl;
+		if(0==i){//init values
+			x1 = x2 = x;
+			y1 = y2 = y;
+			z1 = z2 = z;
+		}else{//max/min
+			x1 = std::min(x1,x); x2 = std::max(x2,x);
+			y1 = std::min(y1,y); y2 = std::max(y2,y);
+			z1 = std::min(z1,z); z2 = std::max(z2,z);
+		}
+		//add new vertex
+		_vertices[ str + boost::lexical_cast<std::string>(i) ] = Vector3(x,y,z);
+			
+	}
+	//all faces (number vertices, x1,x2,...,x_n )
+	for(long i = 0; i<numFaces;++i){
+		int n;
+		file >> line;	
+		n = atoi(line.c_str());
+		std::cout<<"n = "<<n<<std::endl;
+		
+		if(n==4){
+			long a,b,c,d;
+			file >> line; a = atol(line.c_str());
+			file >> line; b = atol(line.c_str());
+			file >> line; c = atol(line.c_str());
+			file >> line; d = atol(line.c_str());
+			std::cout<< "face "<<i<<": "<<a<<" "<<b<<" "<<c<<" "<<d<<std::endl;
+			Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
+							_vertices[str + boost::lexical_cast<std::string>(b)],
+							_vertices[str + boost::lexical_cast<std::string>(c)]);
+			//TODO: which material?			
+			t->setMaterial(&_materials[ "mat1" ]);
+			_objects.push_back(t);
+			t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
+						_vertices[str + boost::lexical_cast<std::string>(c)],
+						_vertices[str + boost::lexical_cast<std::string>(d)]);
+			t->setMaterial(&_materials[ "mat1" ]);
+			_objects.push_back(t);
+		}else if(3==n){
+			long a,b,c;
+			file >> line; a = atol(line.c_str());
+			file >> line; b = atol(line.c_str());
+			file >> line; c = atol(line.c_str());
+			std::cout<< "face "<<i<<": "<<a<<" "<<b<<" "<<c<<std::endl;
+			Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
+							_vertices[str + boost::lexical_cast<std::string>(b)],
+							_vertices[str + boost::lexical_cast<std::string>(c)]);
+			//TODO: which material?			
+			t->setMaterial(&_materials[ "mat1" ]);
+			_objects.push_back(t);
+		}else{
+			std::cout<<"WARNING: "<< n <<" vertices per face not supported!"<<std::endl;	
+			return;	
+		}
+	}
+}
+
 
