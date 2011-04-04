@@ -85,6 +85,15 @@ struct TracingFunctor{
 	
 	}
 
+	void operator()(const std::vector<PrimaryRayBundle>::const_iterator a,
+					 const std::vector<PrimaryRayBundle>::const_iterator b) {
+		std::vector<PrimaryRayBundle>::const_iterator iter = a;
+		while(iter != b){	
+			operator()(*iter);
+			++iter;		
+		}	
+	}
+
 	void operator() (const PrimaryRayBundle &raybundle) {
 		Color col = Color(0,0,0);
 		//trace all rays and average the resulting color

@@ -8,6 +8,7 @@
 /** compilieren mit -fopenmp **/
 #include <cmath>
 #include <iostream>
+#include <omp.h>
 
 //use this function to initialize raytracer each constructor
 void Raytracer::loadDefaultScene(){
@@ -281,29 +282,38 @@ Color Raytracer::traceRay(const Ray& ray){
 
 
 void Raytracer::traceRays(const std::vector<PrimaryRayBundle>& rays){
-
+	int num_threads = 2*omp_get_max_threads();
 
 	TracingFunctor t_func( *this );
 	std::cout<< rays.size()<<" rays to trace"<<std::endl;
-	
-	//std::for_each(rays.begin(),rays.end(),t_func);
-	std::cout<<"O% "; 
-	std::cout.flush();
-	int process = 0;
-	for(unsigned int i = 0; i<rays.size();++i){
-		int tmp = (int)(100.0*i/rays.size());
-		if (tmp!=process){
-			process = tmp;
-			std::cout<<"\r\r\r\r"<<process<<"%";
-			std::cout.flush();
-		}		
-		t_func(rays.at(i));	
+/*
+	//build blocks
+	typedef std::vector<PrimaryRayBundle>::const_iterator RayIter;
+	std::vector< std::pair<RayIter,RayIter> > rayblocks;
+	int stepsize = rays.size()/num_threads;
+	int count = 0;
+	RayIter a=rays.begin();
+	while(count+stepsize<rays.size()){
+		rayblocks.push_back( std::make_pair(a,a+stepsize) );
+		a += stepsize;
+		count += stepsize;	
 	}
-	std::cout<<std::endl;
-
-	std::cout<<"finished tracing!"<<std::endl;
-	//serial version in <algorithm>	
-	//__gnu_parallel::for_each(rays.begin(),rays.end(),t_func); //parallel version in	<parallel/algorithm>
+	if(a!=rays.end()){
+		std::pair<RayIter,RayIter> rpair = 	std::make_pair(a,rays.end());
+		rayblocks.push_back(rpair );
+	}
+	std::cout<<"build "<<rayblocks.size()<<" blocks"<<std::endl;
+	
+	//#pragma omp parallel for
+	for(unsigned int i=0; i<rayblocks.size();++i)
+		t_func(rayblocks.at(i).first,rayblocks.at(i).second);
+	*/
+	
+	#pragma omp parallel for
+	for(unsigned int i=0; i<rays.size();++i)
+		t_func(rays.at(i));
+	
+	
 }
 
 
@@ -386,7 +396,8 @@ void Raytracer::trace(){
 	std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
 	traceRays(primRays);
 	std::cout<<"start antialiasing"<<std::endl;
-	antialiase(); //remove ugly egdes
+	//TODO: uncomment
+	//antialiase(); //remove ugly egdes
 	time(&stop);
 	std::cout<<"Runtime: "<<difftime(stop,start)<<" seconds."<<std::endl;
 }
