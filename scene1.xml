@@ -7,13 +7,13 @@
 		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
 		<Bound Name="Width" value="2." />
 		<Bound Name="Height" value="2." />
-		<Bound Name="PixelPerUnit"  value="400" />
+		<Bound Name="PixelPerUnit"  value="50" />
 		<Bound Name="Supersampling" value="4" />
 	</Boundaries>
 
 	<Lights>
 		<Light Name="ambient light" Color="0.5 0.5 0.5" Type="ambient" />
-		<Light Name="Light 1" Color="1 1 1" Position="0 1 2"  Intensity = "0.5" Type="point" />	
+		<Light Name="Light 1" Color="1 1 1" Position="0 2 2"  Intensity = "0.5" Type="point" />	
 	</Lights>
 
 	<Materials>
@@ -25,7 +25,13 @@
 
 	<Geometry>
 		<Implicits>
+			<!--			
+			<Object Name="DebugSphere" Type="Sphere" Position="0 0 2" Radius="0.5" Material="mat4"/>
 			<Object Name="Sphere1" Type="Sphere" Position=".3 -0.7 2" Radius="0.3" Material="mat4"/>
+			<Object Name="Sphere2" Type="Sphere" Position=".3 0.7 2.8" Radius="0.1" Material="mat4"/>
+			<Object Name="Sphere3" Type="Sphere" Position="-.3 -0.7 1.5" Radius="0.1" Material="mat4"/>
+			<Object Name="Sphere4" Type="Sphere" Position="-.3 0.7 2.3" Radius="0.1" Material="mat4"/>
+			-->
 		</Implicits>
 		<Points>
 			<Point Name="LUH" Position="-1 -1 3"/>
@@ -50,7 +56,9 @@
 			<Triangle Name="unten1" A="LUV" B="LUH" C="RUH" Material="mat3"/>
 			<Triangle Name="unten2" A="LUV" B="RUH" C="RUV" Material="mat3"/>
 		</Triangles>
-
+		<OFF>
+			<OFF-Mesh Name="teapot.off" Material="mat4" x1 = "-1" x2 ="1" y1 ="-1" y2 ="1" z1 ="1" z2 ="3">
+		</OFF>
 	</Geometry>
 
 </Scene>

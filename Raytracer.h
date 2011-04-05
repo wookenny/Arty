@@ -49,7 +49,8 @@ class Raytracer{
 		Color localColor(const IntersectionCompound&,const Ray&) const;
 		//TODO: anteil vom schatten zurückgeben
 		bool inShadow(const Vector3& coord, const Vector3& light) const;		
-		void loadOFF_File(const std::string &str, real x_min, real x_max, real y_min, real y_max, real z_min, real z_max);
+		void loadOFF_File(const std::string &str, real x_min, real x_max, 
+								real y_min, real y_max, real z_min, real z_max, std::string material);
 
 
 	public:

@@ -226,9 +226,19 @@ void Raytracer::loadScene(const std::string &xmlfile){
 		_objects.push_back(t);
 		std::cout<<"Added triangle "<<name<<std::endl;
 	}
+		
+	//get off files
+	child = doc.child("Scene").child("Geometry").child("OFF");
+	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
+		std::string name = it->attribute("Name").value();
+		loadOFF_File(name,
+						it->attribute("x1").as_float(),it->attribute("x2").as_float(),
+						it->attribute("y1").as_float(),it->attribute("y2").as_float(),
+						it->attribute("z1").as_float(),it->attribute("z2").as_float(),
+						it->attribute("Material").value());
+	}
 
-	//TODO: test
-	loadOFF_File("teapot.off", 0,0,0,0,0,0);
+	
 }
 
 
@@ -428,7 +438,8 @@ bool Raytracer::inShadow(const Vector3& coord, const Vector3& light) const{
 	return false;
 }		
 
-void Raytracer::loadOFF_File(const std::string &str, real x_min, real x_max, real y_min, real y_max, real z_min, real z_max){
+void Raytracer::loadOFF_File(const std::string &str, real x_min, 
+			real x_max, real y_min, real y_max, real z_min, real z_max, std::string material){
 	//open file
 	std::ifstream file;
 	file.open(str.c_str());
@@ -443,17 +454,15 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min, real x_max, rea
 	file >> line;	
 	long numFaces = atol(line.c_str());
 	file >> line;	
-	long numEdges = atol(line.c_str());
-	std::cout<< numVertices<<" "<< numFaces<<" "<< numEdges<<std::endl;
 	
 	//all vertices (x y z)
-	real x1,x2,y1,y2,z1,z2;
+	real x1,x2,y1,y2,z1,z2; x1=x2=y1=y2=z1=z2=0;
 	for(long i = 0; i<numVertices;++i){
 		real x,y,z;
 		file >> line; x = real(atof(line.c_str()));
 		file >> line; z = real(atof(line.c_str()));
 		file >> line; y = real(atof(line.c_str()));
-		std::cout<< "vertex: "<<x<<" "<<y<<" "<<z<<std::endl;
+
 		if(0==i){//init values
 			x1 = x2 = x;
 			y1 = y2 = y;
@@ -467,12 +476,47 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min, real x_max, rea
 		_vertices[ str + boost::lexical_cast<std::string>(i) ] = Vector3(x,y,z);
 			
 	}
+
+	//shift all points
+	real scale = (x_max - x_min)/(x2-x1);
+	scale = std::min(scale, (y_max - y_min)/(y2-y1) ); 
+	scale = std::min(scale, (z_max - z_min)/(z2-z1) ); 
+	
+	real x_shift = x_min - x1*scale;
+	real y_shift = y_min - y1*scale;  
+	real z_shift = z_min - z1*scale;  
+
+	std::cout<<"OFF object lies in ["<<x1<<":"<<x2<<"]["<<y1<<":"<<y2<<"]["<<z1<<":"<<z2<<"]"<<std::endl;
+	std::cout<<"scale by: "<<scale<<":"<<scale<<":"<<scale<<std::endl;		
+	std::cout<<"translate by: "<<x_shift<<":"<<y_shift<<":"<<z_shift<<std::endl;		
+	for(long i = 0; i<numVertices;++i){
+		//scale point
+		std::string name = str + boost::lexical_cast<std::string>(i);
+		_vertices[ name ] *= scale;
+		//shift point
+		_vertices[ name ] += Vector3(x_shift,y_shift,z_shift);
+		if(0==i){
+			x1 = x2 =  	_vertices[ name ][0];
+			y1 = y2 = 	_vertices[ name ][1];
+			z1 = z2 = 	_vertices[ name ][2];	
+		}else{
+			x1 = std::min(x1,_vertices[ name ][0]); x2 = std::max(x2,_vertices[ name ][0]);
+			y1 = std::min(y1,_vertices[ name ][1]); y2 = std::max(y2,_vertices[ name ][1]);
+			z1 = std::min(z1,_vertices[ name ][2]); z2 = std::max(z2,_vertices[ name ][2]); 			
+		}		
+	}
+	std::cout<<"new OFF object lies in ["<<x1<<":"<<x2<<"]["<<y1<<":"<<y2<<"]["<<z1<<":"<<z2<<"]"<<std::endl;	
+
+	//save all normals for a given point
+	//TODO: finish this
+	boost::unordered_map<Vector3*, Vector3> _normalsAtPoint;
+	unsigned int currPosition = _objects.size();
+
 	//all faces (number vertices, x1,x2,...,x_n )
 	for(long i = 0; i<numFaces;++i){
 		int n;
 		file >> line;	
 		n = atoi(line.c_str());
-		std::cout<<"n = "<<n<<std::endl;
 		
 		if(n==4){
 			long a,b,c,d;
@@ -480,34 +524,84 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min, real x_max, rea
 			file >> line; b = atol(line.c_str());
 			file >> line; c = atol(line.c_str());
 			file >> line; d = atol(line.c_str());
-			std::cout<< "face "<<i<<": "<<a<<" "<<b<<" "<<c<<" "<<d<<std::endl;
 			Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
 							_vertices[str + boost::lexical_cast<std::string>(b)],
 							_vertices[str + boost::lexical_cast<std::string>(c)]);
-			//TODO: which material?			
-			t->setMaterial(&_materials[ "mat1" ]);
+			t->setMaterial(&_materials[ material ]);
+			
 			_objects.push_back(t);
 			t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
 						_vertices[str + boost::lexical_cast<std::string>(c)],
 						_vertices[str + boost::lexical_cast<std::string>(d)]);
-			t->setMaterial(&_materials[ "mat1" ]);
+			t->setMaterial(&_materials[ material ]);
 			_objects.push_back(t);
+
+			//save the normal for every point involved
+			//this assumes that the 4 points lie on a comon plane
+			//A			
+			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(a)])==_normalsAtPoint.end())
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(a)]] = t->getTriangleNormal();
+			else
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(a)]]+=t->getTriangleNormal();
+			//B				
+			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(b)])==_normalsAtPoint.end())
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(b)]]=t->getTriangleNormal();
+			else
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(b)]]+=t->getTriangleNormal();
+			//C				
+			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(c)])==_normalsAtPoint.end())
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(c)]]=t->getTriangleNormal();
+			else
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(c)]]+=t->getTriangleNormal();
+			//D				
+			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(d)])==_normalsAtPoint.end())
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(d)]]=t->getTriangleNormal();
+			else
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(d)]]+=t->getTriangleNormal();
+
 		}else if(3==n){
 			long a,b,c;
 			file >> line; a = atol(line.c_str());
 			file >> line; b = atol(line.c_str());
 			file >> line; c = atol(line.c_str());
-			std::cout<< "face "<<i<<": "<<a<<" "<<b<<" "<<c<<std::endl;
 			Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
 							_vertices[str + boost::lexical_cast<std::string>(b)],
 							_vertices[str + boost::lexical_cast<std::string>(c)]);
-			//TODO: which material?			
-			t->setMaterial(&_materials[ "mat1" ]);
+		
+			t->setMaterial(&_materials[ material ]);
 			_objects.push_back(t);
+			
+			//save the normal for every point involved
+			//A			
+			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(a)])==_normalsAtPoint.end())
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(a)]]=t->getTriangleNormal();
+			else
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(a)]]+=t->getTriangleNormal();
+			//B			
+			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(b)])==_normalsAtPoint.end())
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(b)]]=t->getTriangleNormal();
+			else
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(b)]]+=t->getTriangleNormal();
+			//C			
+			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(c)])==_normalsAtPoint.end())
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(c)]]=t->getTriangleNormal();
+			else
+				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(c)]]+=t->getTriangleNormal();
+
 		}else{
 			std::cout<<"WARNING: "<< n <<" vertices per face not supported!"<<std::endl;	
 			return;	
 		}
+	}
+	
+	//now: set the correct normals for every single triangle
+	while(currPosition < _objects.size()){
+		Triangle *t = dynamic_cast<Triangle*>(_objects.at(currPosition));
+		t->addNormal(0, _normalsAtPoint[t->getVertex1()] );
+		t->addNormal(1, _normalsAtPoint[t->getVertex2()] );
+		t->addNormal(2, _normalsAtPoint[t->getVertex3()] );
+		//t->normalizeNormals();
+		++currPosition;		
 	}
 }
 

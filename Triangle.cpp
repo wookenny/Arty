@@ -6,6 +6,10 @@ Triangle::Triangle( const Vector3& v1, const Vector3& v2, const Vector3& v3){
 	_normal = (_v2-_v1).cross(_v3-_v1);
 	_normal.normalize();
 
+	//set normals for points to 0
+	_normals[0] = _normals[1] = _normals[2] = Vector3(0,0,0);
+	_normalsSet = false;
+
 	_dominant = getDominantAxis();
 
 	_b[0]= _dominant==0?(_v2[1]-_v1[1]):(_v2[0]-_v1[0]);
@@ -29,7 +33,6 @@ IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
 	//mehod from http://www.devmaster.net/wiki/Ray-triangle_intersection
 	
 	//currently slow version. stores at least the normal.
-	//TODO store some of the calculations
 	real distance = -((ray.getOrigin()-_v1).dot(_normal))/(ray.getDirection().dot(_normal));	
 	if(distance<eps){//no hit if the triangle is hit from behind
 		//std::cout<<"behind object"<<std::endl;
@@ -55,6 +58,10 @@ IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
 		return ic;	
 	}
 	ic.mat = getMaterial();	
-	ic.normal = _normal;
+	if(not _normalsSet )
+		ic.normal = _normal;
+	else
+		ic.normal = u*_normals[0] + v*_normals[1]+(1-u-v)*_normals[2];
+		ic.normal.normalize();
 	return ic;
 }
