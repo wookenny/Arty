@@ -29,17 +29,9 @@ class Triangle: public Obstacle{
 			//c_strs
 		Triangle( const Vector3& v1, const Vector3& v2, const Vector3& v3);
 
-		//methods
-		const Vector3& getTriangleNormal()const{return _normal;}
-		void addNormal(unsigned int pos, const Vector3 &normal){
-			_normals[pos] += normal;
-		}
-
-		Vector3* getVertex1(){return &_v1;} 			
-		Vector3* getVertex2(){return &_v2;} 			
-		Vector3* getVertex3(){return &_v3;} 			
-
-		void normalizeNormals(){
+		
+		void setNormals(const Vector3  n1, const Vector3 n2, const Vector3 n3){
+			_normals[0] = n1;_normals[1] = n2;_normals[2] = n3;
 			_normals[0].normalize();_normals[1].normalize();_normals[2].normalize();
 			_normalsSet = true;
 		}

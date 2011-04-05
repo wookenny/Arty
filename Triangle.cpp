@@ -53,7 +53,7 @@ IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
 	real v = (p[1]*_b[0] - p[0]*_b[1])/_div2;
 
 	//ensure u,v,w \in [0,1]
-	if(u<eps || v<eps || u+v>1+eps){ // not hit
+	if(u<-eps || v<-eps || u+v>1+eps){ // not hit
 		ic.t = -1;	
 		return ic;	
 	}
@@ -61,7 +61,7 @@ IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
 	if(not _normalsSet )
 		ic.normal = _normal;
 	else
-		ic.normal = u*_normals[0] + v*_normals[1]+(1-u-v)*_normals[2];
+		ic.normal = u*_normals[1] + v*_normals[2] + (1-u-v)*_normals[0];
 		ic.normal.normalize();
 	return ic;
 }
