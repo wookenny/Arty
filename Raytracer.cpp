@@ -273,7 +273,7 @@ Color Raytracer::traceRay(const Ray& ray){
 		if(intersection.mat->getSpecular()>eps || ray.getDepth()>0){	
 			Ray reflectedRay = Ray::getReflectedRay(ray,intersection.t,intersection.normal);
 			col += intersection.mat->getSpecular()*traceRay(reflectedRay);		
-		//TODO: um reflektion und tranparenz erweitern
+		//TODO: tranparenz erweitern
 		}
 	}
 		
@@ -396,8 +396,7 @@ void Raytracer::trace(){
 	std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
 	traceRays(primRays);
 	std::cout<<"start antialiasing"<<std::endl;
-	//TODO: uncomment
-	//antialiase(); //remove ugly egdes
+	antialiase(); //remove ugly egdes
 	time(&stop);
 	std::cout<<"Runtime: "<<difftime(stop,start)<<" seconds."<<std::endl;
 }
