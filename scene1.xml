@@ -7,13 +7,13 @@
 		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
 		<Bound Name="Width" value="2." />
 		<Bound Name="Height" value="2." />
-		<Bound Name="PixelPerUnit"  value="50" />
+		<Bound Name="PixelPerUnit"  value="400" />
 		<Bound Name="Supersampling" value="4" />
 	</Boundaries>
 
 	<Lights>
 		<Light Name="ambient light" Color="0.5 0.5 0.5" Type="ambient" />
-		<Light Name="Light 1" Color="1 1 1" Position="0 2 2"  Intensity = "0.5" Type="point" />	
+		<Light Name="Light 1" Color="1 1 1" Position="0 2 1"  Intensity = "0.5" Type="point" />	
 	</Lights>
 
 	<Materials>
@@ -57,7 +57,7 @@
 			<Triangle Name="unten2" A="LUV" B="RUH" C="RUV" Material="mat3"/>
 		</Triangles>
 		<OFF>
-			<OFF-Mesh Name="teapot.off" Material="mat4" x1 = "-1" x2 ="1" y1 ="-1" y2 ="1" z1 ="1" z2 ="3">
+			<OFF-Mesh Name="teapot.off" Material="mat4" x1 = "-.8" x2 =".3" y1 ="-1" y2 ="0.85" z1 ="2" z2 ="3">
 		</OFF>
 	</Geometry>
 

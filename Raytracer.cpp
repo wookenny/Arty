@@ -12,7 +12,7 @@
 
 #include <fstream>
 #include <boost/lexical_cast.hpp>
-
+#include <boost/tuple/tuple.hpp>
 
 //use this function to initialize raytracer each constructor
 void Raytracer::loadDefaultScene(){
@@ -486,7 +486,7 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 	real y_shift = y_min - y1*scale;  
 	real z_shift = z_min - z1*scale;  
 
-	std::cout<<"OFF object lies in ["<<x1<<":"<<x2<<"]["<<y1<<":"<<y2<<"]["<<z1<<":"<<z2<<"]"<<std::endl;
+	std::cout<<"OFF object "<<str<<" lies in ["<<x1<<":"<<x2<<"]["<<y1<<":"<<y2<<"]["<<z1<<":"<<z2<<"]"<<std::endl;
 	std::cout<<"scale by: "<<scale<<":"<<scale<<":"<<scale<<std::endl;		
 	std::cout<<"translate by: "<<x_shift<<":"<<y_shift<<":"<<z_shift<<std::endl;		
 	for(long i = 0; i<numVertices;++i){
@@ -506,13 +506,10 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 		}		
 	}
 	std::cout<<"new OFF object lies in ["<<x1<<":"<<x2<<"]["<<y1<<":"<<y2<<"]["<<z1<<":"<<z2<<"]"<<std::endl;	
+	
 
-	//save all normals for a given point
-	//TODO: finish this
-	boost::unordered_map<Vector3*, Vector3> _normalsAtPoint;
-	unsigned int currPosition = _objects.size();
-
-	//all faces (number vertices, x1,x2,...,x_n )
+	std::vector< boost::tuple<long,long,long> > triangleList;
+	std::vector<Vector3> normals(numVertices, Vector3(0,0,0));
 	for(long i = 0; i<numFaces;++i){
 		int n;
 		file >> line;	
@@ -524,85 +521,55 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 			file >> line; b = atol(line.c_str());
 			file >> line; c = atol(line.c_str());
 			file >> line; d = atol(line.c_str());
-			Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
-							_vertices[str + boost::lexical_cast<std::string>(b)],
-							_vertices[str + boost::lexical_cast<std::string>(c)]);
-			t->setMaterial(&_materials[ material ]);
-			
-			_objects.push_back(t);
-			t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
-						_vertices[str + boost::lexical_cast<std::string>(c)],
-						_vertices[str + boost::lexical_cast<std::string>(d)]);
-			t->setMaterial(&_materials[ material ]);
-			_objects.push_back(t);
-
-			//save the normal for every point involved
-			//this assumes that the 4 points lie on a comon plane
-			//A			
-			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(a)])==_normalsAtPoint.end())
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(a)]] = t->getTriangleNormal();
-			else
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(a)]]+=t->getTriangleNormal();
-			//B				
-			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(b)])==_normalsAtPoint.end())
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(b)]]=t->getTriangleNormal();
-			else
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(b)]]+=t->getTriangleNormal();
-			//C				
-			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(c)])==_normalsAtPoint.end())
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(c)]]=t->getTriangleNormal();
-			else
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(c)]]+=t->getTriangleNormal();
-			//D				
-			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(d)])==_normalsAtPoint.end())
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(d)]]=t->getTriangleNormal();
-			else
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(d)]]+=t->getTriangleNormal();
+			triangleList.push_back( boost::make_tuple(a,b,c) );
+			triangleList.push_back( boost::make_tuple(a,c,d) );
+			//create Normal
+			const Vector3& v1 = _vertices[ str + boost::lexical_cast<std::string>(a) ];
+			const Vector3& v2 = _vertices[ str + boost::lexical_cast<std::string>(b) ];
+			const Vector3& v3 = _vertices[ str + boost::lexical_cast<std::string>(c) ];
+			Vector3 n = (v2-v1).cross(v3-v1);
+			n.normalize();
+			normals.at(a) += n;
+			normals.at(b) += n;
+			normals.at(c) += n;
+			normals.at(d) += n;
 
 		}else if(3==n){
 			long a,b,c;
 			file >> line; a = atol(line.c_str());
 			file >> line; b = atol(line.c_str());
 			file >> line; c = atol(line.c_str());
-			Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
-							_vertices[str + boost::lexical_cast<std::string>(b)],
-							_vertices[str + boost::lexical_cast<std::string>(c)]);
-		
-			t->setMaterial(&_materials[ material ]);
-			_objects.push_back(t);
-			
-			//save the normal for every point involved
-			//A			
-			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(a)])==_normalsAtPoint.end())
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(a)]]=t->getTriangleNormal();
-			else
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(a)]]+=t->getTriangleNormal();
-			//B			
-			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(b)])==_normalsAtPoint.end())
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(b)]]=t->getTriangleNormal();
-			else
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(b)]]+=t->getTriangleNormal();
-			//C			
-			if(	_normalsAtPoint.find(&_vertices[str + boost::lexical_cast<std::string>(c)])==_normalsAtPoint.end())
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(c)]]=t->getTriangleNormal();
-			else
-				_normalsAtPoint[&_vertices[str + boost::lexical_cast<std::string>(c)]]+=t->getTriangleNormal();
+			triangleList.push_back( boost::make_tuple(a,b,c) );
+			//create Normal
+			const Vector3& v1 = _vertices[ str + boost::lexical_cast<std::string>(a) ];
+			const Vector3& v2 = _vertices[ str + boost::lexical_cast<std::string>(b) ];
+			const Vector3& v3 = _vertices[ str + boost::lexical_cast<std::string>(c) ];
+			Vector3 n = (v2-v1).cross(v3-v1);
+			n.normalize();
+			normals.at(a) += n;
+			normals.at(b) += n;
+			normals.at(c) += n;
 
 		}else{
 			std::cout<<"WARNING: "<< n <<" vertices per face not supported!"<<std::endl;	
 			return;	
 		}
 	}
-	
-	//now: set the correct normals for every single triangle
-	while(currPosition < _objects.size()){
-		Triangle *t = dynamic_cast<Triangle*>(_objects.at(currPosition));
-		t->addNormal(0, _normalsAtPoint[t->getVertex1()] );
-		t->addNormal(1, _normalsAtPoint[t->getVertex2()] );
-		t->addNormal(2, _normalsAtPoint[t->getVertex3()] );
-		//t->normalizeNormals();
-		++currPosition;		
+
+	//actually create all faces and all cor. normals
+	for(unsigned int i=0; i<triangleList.size(); ++i){
+		long a = triangleList.at(i).get<0>();
+		long b = triangleList.at(i).get<1>();
+		long c = triangleList.at(i).get<2>();
+		Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
+						_vertices[str + boost::lexical_cast<std::string>(b)],
+						_vertices[str + boost::lexical_cast<std::string>(c)]);
+		t->setMaterial(&_materials[ material ]);
+		t->setNormals( normals.at(a), normals.at(b), normals.at(c) );
+		_objects.push_back(t);	
 	}
+
+
 }
 
 
