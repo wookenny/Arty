@@ -11,8 +11,11 @@ class Triangle: public Obstacle{
 				
 
 		//neede for the intersection test
-		real _b[2],_c[2];
-		real _div1,_div2;
+		//no c, no b, no div
+		//real _b[2],_c[2];
+		//real _div1,_div2;
+		real _ud1, _ud2, _vd1, _vd2;		
+		
 		int _dominant;
 		
 		int getDominantAxis() const{

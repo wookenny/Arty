@@ -11,15 +11,20 @@ Triangle::Triangle( const Vector3& v1, const Vector3& v2, const Vector3& v3){
 	_normalsSet = false;
 
 	_dominant = getDominantAxis();
-
+	
+	real _b[2],_c[2];
 	_b[0]= _dominant==0?(_v2[1]-_v1[1]):(_v2[0]-_v1[0]);
 	_b[1]= _dominant==2?(_v2[1]-_v1[1]):(_v2[2]-_v1[2]);
 	_c[0]= _dominant==0?(_v3[1]-_v1[1]):(_v3[0]-_v1[0]);
 	_c[1]= _dominant==2?(_v3[1]-_v1[1]):(_v3[2]-_v1[2]);
 	
-	_div1 = (_b[1]*_c[0]-_b[0]*_c[1]);
-	_div2 = (_c[1]*_b[0]-_c[0]*_b[1]);
+	real _div1 = (_b[1]*_c[0]-_b[0]*_c[1]);
+	real _div2 = (_c[1]*_b[0]-_c[0]*_b[1]);
 
+	_ud1 =   _c[0]/_div1;
+	_ud2 = - _c[1]/_div1;
+	_vd1 =   _b[0]/_div2;
+	_vd2 = - _b[1]/_div2;	
 }
 
 IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
@@ -31,8 +36,7 @@ IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
 	ic.px=ic.py=-1;
 	ic.t = -1;
 	//mehod from http://www.devmaster.net/wiki/Ray-triangle_intersection
-	
-	//currently slow version. stores at least the normal.
+
 	real distance = -((ray.getOrigin()-_v1).dot(_normal))/(ray.getDirection().dot(_normal));	
 	if(distance<eps){//no hit if the triangle is hit from behind
 		//std::cout<<"behind object"<<std::endl;
@@ -49,14 +53,22 @@ IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
 	p[0]= _dominant==0?(point[1]-_v1[1]):(point[0]-_v1[0]);
 	p[1]= _dominant==2?(point[1]-_v1[1]):(point[2]-_v1[2]);
 
-	real u = (p[1]*_c[0] - p[0]*_c[1])/_div1;
-	real v = (p[1]*_b[0] - p[0]*_b[1])/_div2;
 
+	real u = p[1]*_ud1  + p[0]*_ud2;
+	if(u<-eps){//not hit
+		ic.t = -1;	
+		return ic;		
+	}
+
+
+	real v = p[1]* _vd1 + p[0]*_vd2;
 	//ensure u,v,w \in [0,1]
-	if(u<-eps || v<-eps || u+v>1+eps){ // not hit
+	if( v<-eps or u+v>1+eps){ // not hit
 		ic.t = -1;	
 		return ic;	
 	}
+
+	//calculate correct color
 	ic.mat = getMaterial();	
 	if(not _normalsSet )
 		ic.normal = _normal;
