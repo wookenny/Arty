@@ -44,7 +44,7 @@ class Raytracer{
 		//methods used by the raytracer
 		std::vector<PrimaryRayBundle> generatePrimaryRays() const;
 		Color traceRay(const Ray&);
-		void traceRays(const std::vector<PrimaryRayBundle>&);
+		void traceRays(std::vector<PrimaryRayBundle>&);
 		void antialiase(bool debug = false);
 		Color localColor(const IntersectionCompound&,const Ray&) const;
 		//TODO: anteil vom schatten zurückgeben
@@ -88,41 +88,41 @@ struct TracingFunctor{
 	
 	}
 
-	inline void operator()(const std::vector<PrimaryRayBundle>::const_iterator a,
-					 const std::vector<PrimaryRayBundle>::const_iterator b) {
-		std::vector<PrimaryRayBundle>::const_iterator iter = a;
+	inline void operator()(std::vector<PrimaryRayBundle>::iterator a,
+					  std::vector<PrimaryRayBundle>::iterator b) {
+		std::vector<PrimaryRayBundle>::iterator iter = a;
 		while(iter != b){	
 			operator()(*iter);
 			++iter;		
 		}	
 	}
 
-	inline void operator() (const PrimaryRayBundle &raybundle) {
-		Color col = Color(0,0,0);
+	inline void operator() ( PrimaryRayBundle &raybundle) {
+		Color &col =  _rt._tracedImage.at( raybundle.x, raybundle.y);
+		col = Color(0,0,0);
 		//trace all rays and average the resulting color
 		int s = raybundle.sampling; 
 		for(int n=0; n<s; ++n)
 			for(int m=0; m<s; ++m){
 				//calculate right ray;
-				Ray ray = raybundle.r;
+				Ray &ray = raybundle.r;
 				//std::cout<< real(n)/s <<std::endl;
 				//std::cout<< real(m)/s <<std::endl;
 
 				real rightShift = _rt._width*(raybundle.x+( (n%2==0?.5:-.5)*real(n)/s))/_rt._tracedImage.getWidth();
 				real downShift = _rt._height*(raybundle.y+( (m%2==0?.5:-.5)*real(m)/s))/_rt._tracedImage.getHeight();
-				Vector3 dir = _rt._upperLeftCorner 
+				Vector3 &dir = ray.Direction();
+				dir = _rt._upperLeftCorner 
 							+ _rt._right * rightShift  
 							+ _rt._down * downShift
 							- _rt._eye;
 				dir.normalize();
-				ray.setDirection( dir );
 				col += _rt.traceRay(ray);
 				}
 				
-		_rt._tracedImage.at( raybundle.x, raybundle.y) = col/(s*s);
+		col/=(s*s);
 		//highlight edges
 		if(s>1&&_showEdges)
-			_rt._tracedImage.at( raybundle.x, raybundle.y) =Color(1,0,0);
-		
+			col = Color(1,0,0);
 	}
 };

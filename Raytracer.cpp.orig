@@ -8,11 +8,12 @@
 /** compilieren mit -fopenmp **/
 #include <cmath>
 #include <iostream>
+<<<<<<< HEAD
 #include <omp.h>
-
+=======
 #include <fstream>
 #include <boost/lexical_cast.hpp>
-#include <boost/tuple/tuple.hpp>
+>>>>>>> abbe7f85e38f63f2daab58e0282d5ee38db144f0
 
 //use this function to initialize raytracer each constructor
 void Raytracer::loadDefaultScene(){
@@ -101,7 +102,7 @@ void Raytracer::loadDefaultScene(){
 
 
 void Raytracer::loadScene(const std::string &xmlfile){
-	//std::cout<<"loading scene "<<xmlfile<<std::endl;
+	std::cout<<"loading scene "<<xmlfile<<std::endl;
 	//code_load_file
         pugi::xml_document doc;
         pugi::xml_parse_result result = doc.load_file(xmlfile.c_str());
@@ -114,34 +115,42 @@ void Raytracer::loadScene(const std::string &xmlfile){
 		if ( name == std::string("Eye") ){
 			++ait;
 			_eye = Vector3(ait->value());
+			std::cout<<"Eye = "<<_eye<<std::endl;
  		}
 		else if ( name == std::string("Right") ){
 			++ait;
 			_right = Vector3(ait->value());
+			std::cout<<"Right = "<<_right<<std::endl;
  		}
 		else if ( name == std::string("Down") ){
 			++ait;
 			_down = Vector3(ait->value());
+			std::cout<<"Down = "<<_down<<std::endl;
  		}
 		else if ( name == std::string("UpperLeftCorner") ){
 			++ait;
 			_upperLeftCorner = Vector3(ait->value());
+			std::cout<<"UpperLeftCorner = "<<_upperLeftCorner<<std::endl;
  		}
 		else if ( name == std::string("Width") ){
 			++ait;
 			_width = ait->as_float();
+			std::cout<<"Width = "<<_width<<std::endl;
 		}
 		else if ( name == std::string("Height") ){
 			++ait;
 			_height = ait->as_float();
+			std::cout<<"Height = "<<_height<<std::endl;
 		}
 		else if ( name == std::string("PixelPerUnit") ){
 			++ait;
 			_pixelPerUnit = ait->as_int();
+			std::cout<<"PixelPerUnit = "<<_pixelPerUnit<<std::endl;
 		}
 		else if ( name == std::string("Supersampling") ){
 			++ait;
 			_superSampling = ait->as_int();
+			std::cout<<"Supersampling = "<<_superSampling<<std::endl;
 		}
 		//additional settings:
 		_maxRayDepth = 4;	
@@ -156,6 +165,7 @@ void Raytracer::loadScene(const std::string &xmlfile){
 		std::string type = it->attribute("Type").value();		
 		if(type == "ambient"){
 			_ambient = 0.05*Color(it->attribute("Color").value());
+			std::cout<<"ambient = "<<_ambient<<std::endl;		
 		}else if( type == "point"){
 			Vector3 lightpos(it->attribute("Position").value());
 			_lights.push_back(Lightsource(lightpos, it->attribute("Intensity").as_float(), 
@@ -177,15 +187,8 @@ void Raytracer::loadScene(const std::string &xmlfile){
 			tmpmat.setSpecular(it->attribute("Specular").as_float());
 		if( it->attribute("Shininess") )
 			tmpmat.setShininess(it->attribute("Shininess").as_int());
-		if( it->attribute("Reflection") )
-			tmpmat.setReflection(it->attribute("Reflection").as_float());
-		if( it->attribute("Texture") ){
-			//TODO get rid of memory
-			Image *img = new Image(it->attribute("Texture").value());
-			tmpmat.setTexture(img);	
-		}
 		_materials[name] = tmpmat;
-
+		std::cout<<"Added material "<<name<<std::endl;
 	}
 	
 	//get implicit objects 
@@ -195,8 +198,10 @@ void Raytracer::loadScene(const std::string &xmlfile){
 		if(type == "Sphere"){	
 			Sphere* s = new Sphere( Vector3(it->attribute("Position").value()),
 						it->attribute("Radius").as_float());
+			
 			s->setMaterial(&_materials[it->attribute("Material").value()]);
 			_objects.push_back(s);//pointers because of polymorphism
+			std::cout<<"Added object of type "<<type<<std::endl;
 		}else{
 			std::cout<<"Warning: implicit object with type "<<type<<" not supported!"<<std::endl;		
 		}
@@ -207,6 +212,7 @@ void Raytracer::loadScene(const std::string &xmlfile){
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		std::string name = it->attribute("Name").value();
 		_vertices[name] = Vector3(  it->attribute("Position").value() );
+		std::cout<<"Added point "<<name<<std::endl;
 	}
 
 	//get triangles
@@ -218,23 +224,12 @@ void Raytracer::loadScene(const std::string &xmlfile){
 						_vertices[it->attribute("B").value()],
 						_vertices[it->attribute("C").value()]);
 		t->setMaterial(&_materials[ it->attribute("Material").value() ]);
-
-		if( it->attribute("TextureCoords") )
-			t->setTextureCoords(it->attribute("TextureCoords").value());
-		
 		_objects.push_back(t);
+		std::cout<<"Added triangle "<<name<<std::endl;
 	}
-		
-	//get off files
-	child = doc.child("Scene").child("Geometry").child("OFF");
-	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
-		std::string name = it->attribute("Name").value();
-		loadOFF_File(name,
-						it->attribute("x1").as_float(),it->attribute("x2").as_float(),
-						it->attribute("y1").as_float(),it->attribute("y2").as_float(),
-						it->attribute("z1").as_float(),it->attribute("z2").as_float(),
-						it->attribute("Material").value());
-	}
+
+	//TODO: test
+	loadOFF_File("teapot.off", 0,0,0,0,0,0);
 }
 
 
@@ -283,9 +278,9 @@ Color Raytracer::traceRay(const Ray& ray){
 	if( intersection.t > eps and intersection.mat!=0){//something hit?
 		col = localColor(intersection,ray);	
 
-		if(intersection.mat->getReflection()>eps and ray.getDepth()>0){	
+		if(intersection.mat->getSpecular()>eps || ray.getDepth()>0){	
 			Ray reflectedRay = Ray::getReflectedRay(ray,intersection.t,intersection.normal);
-			col += intersection.mat->getReflection()*traceRay(reflectedRay);		
+			col += intersection.mat->getSpecular()*traceRay(reflectedRay);		
 		//TODO: tranparenz erweitern
 		}
 	}
@@ -294,11 +289,12 @@ Color Raytracer::traceRay(const Ray& ray){
 }
 
 
-void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
+void Raytracer::traceRays(const std::vector<PrimaryRayBundle>& rays){
 	int num_threads = 2*omp_get_max_threads();
 
 	TracingFunctor t_func( *this );
-	//std::cout<< rays.size()<<" rays to trace"<<std::endl;
+	std::cout<< rays.size()<<" rays to trace"<<std::endl;
+<<<<<<< HEAD
 /*
 	//build blocks
 	typedef std::vector<PrimaryRayBundle>::const_iterator RayIter;
@@ -310,6 +306,22 @@ void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
 		rayblocks.push_back( std::make_pair(a,a+stepsize) );
 		a += stepsize;
 		count += stepsize;	
+=======
+	
+	//std::for_each(rays.begin(),rays.end(),t_func);
+	std::cout<<"O% "; 
+	std::cout.flush();
+	int process = 0;
+	#pragma omp parallel for
+	for(unsigned int i = 0; i<rays.size();++i){
+		int tmp = (int)(100.0*i/rays.size());
+		if (tmp!=process){
+			process = tmp;
+			std::cout<<"\r\r\r\r"<<process<<"%";
+			std::cout.flush();
+		}		
+		t_func(rays.at(i));	
+>>>>>>> abbe7f85e38f63f2daab58e0282d5ee38db144f0
 	}
 	if(a!=rays.end()){
 		std::pair<RayIter,RayIter> rpair = 	std::make_pair(a,rays.end());
@@ -321,15 +333,11 @@ void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
 	for(unsigned int i=0; i<rayblocks.size();++i)
 		t_func(rayblocks.at(i).first,rayblocks.at(i).second);
 	*/
-	unsigned int i;
 	
-	//#pragma omp parallel for private(i) shared(t_func) schedule(dynamic)
-	//#pragma omp parallel shared(t_func)
-	{	
-	#pragma omp parallel for schedule(dynamic)
-	for(i=0; i<rays.size();++i)
+	#pragma omp parallel for
+	for(unsigned int i=0; i<rays.size();++i)
 		t_func(rays.at(i));
-	}
+	
 	
 }
 
@@ -400,8 +408,8 @@ void Raytracer::antialiase(bool debug){
 	//TODO: possibility to save one sampling step, because color is in _tracedImage
 	if(debug)
 		return;
-	//std::cout	<<"smooth on "<<100*aliasedRays.size()/(_width*_pixelPerUnit*_height*_pixelPerUnit)
-	//		<<"% of the pixel" <<std::endl;
+	std::cout	<<"smooth on "<<100*aliasedRays.size()/(_width*_pixelPerUnit*_height*_pixelPerUnit)
+			<<"% of the pixel" <<std::endl;
 	traceRays( aliasedRays );
 }
 
@@ -412,8 +420,8 @@ void Raytracer::trace(){
 	time(&start);
 	std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
 	traceRays(primRays);
-	if(_superSampling>0)
-		antialiase(); //remove ugly egdes
+	std::cout<<"start antialiasing"<<std::endl;
+	antialiase(); //remove ugly egdes
 	time(&stop);
 	std::cout<<"Runtime: "<<difftime(stop,start)<<" seconds."<<std::endl;
 }
@@ -438,8 +446,7 @@ bool Raytracer::inShadow(const Vector3& coord, const Vector3& light) const{
 	return false;
 }		
 
-void Raytracer::loadOFF_File(const std::string &str, real x_min, 
-			real x_max, real y_min, real y_max, real z_min, real z_max, std::string material){
+void Raytracer::loadOFF_File(const std::string &str, real x_min, real x_max, real y_min, real y_max, real z_min, real z_max){
 	//open file
 	std::ifstream file;
 	file.open(str.c_str());
@@ -454,15 +461,17 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 	file >> line;	
 	long numFaces = atol(line.c_str());
 	file >> line;	
+	long numEdges = atol(line.c_str());
+	std::cout<< numVertices<<" "<< numFaces<<" "<< numEdges<<std::endl;
 	
 	//all vertices (x y z)
-	real x1,x2,y1,y2,z1,z2; x1=x2=y1=y2=z1=z2=0;
+	real x1,x2,y1,y2,z1,z2;
 	for(long i = 0; i<numVertices;++i){
 		real x,y,z;
 		file >> line; x = real(atof(line.c_str()));
 		file >> line; z = real(atof(line.c_str()));
 		file >> line; y = real(atof(line.c_str()));
-
+		std::cout<< "vertex: "<<x<<" "<<y<<" "<<z<<std::endl;
 		if(0==i){//init values
 			x1 = x2 = x;
 			y1 = y2 = y;
@@ -476,40 +485,12 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 		_vertices[ str + boost::lexical_cast<std::string>(i) ] = Vector3(x,y,z);
 			
 	}
-
-	//shift all points
-	real scale = (x_max - x_min)/(x2-x1);
-	scale = std::min(scale, (y_max - y_min)/(y2-y1) ); 
-	scale = std::min(scale, (z_max - z_min)/(z2-z1) ); 
-	
-	real x_shift = x_min - x1*scale;
-	real y_shift = y_min - y1*scale;  
-	real z_shift = z_min - z1*scale;  
-
-	for(long i = 0; i<numVertices;++i){
-		//scale point
-		std::string name = str + boost::lexical_cast<std::string>(i);
-		_vertices[ name ] *= scale;
-		//shift point
-		_vertices[ name ] += Vector3(x_shift,y_shift,z_shift);
-		if(0==i){
-			x1 = x2 =  	_vertices[ name ][0];
-			y1 = y2 = 	_vertices[ name ][1];
-			z1 = z2 = 	_vertices[ name ][2];	
-		}else{
-			x1 = std::min(x1,_vertices[ name ][0]); x2 = std::max(x2,_vertices[ name ][0]);
-			y1 = std::min(y1,_vertices[ name ][1]); y2 = std::max(y2,_vertices[ name ][1]);
-			z1 = std::min(z1,_vertices[ name ][2]); z2 = std::max(z2,_vertices[ name ][2]); 			
-		}		
-	}
-	
-
-	std::vector< boost::tuple<long,long,long> > triangleList;
-	std::vector<Vector3> normals(numVertices, Vector3(0,0,0));
+	//all faces (number vertices, x1,x2,...,x_n )
 	for(long i = 0; i<numFaces;++i){
 		int n;
 		file >> line;	
 		n = atoi(line.c_str());
+		std::cout<<"n = "<<n<<std::endl;
 		
 		if(n==4){
 			long a,b,c,d;
@@ -517,55 +498,35 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 			file >> line; b = atol(line.c_str());
 			file >> line; c = atol(line.c_str());
 			file >> line; d = atol(line.c_str());
-			triangleList.push_back( boost::make_tuple(a,b,c) );
-			triangleList.push_back( boost::make_tuple(a,c,d) );
-			//create Normal
-			const Vector3& v1 = _vertices[ str + boost::lexical_cast<std::string>(a) ];
-			const Vector3& v2 = _vertices[ str + boost::lexical_cast<std::string>(b) ];
-			const Vector3& v3 = _vertices[ str + boost::lexical_cast<std::string>(c) ];
-			Vector3 n = (v2-v1).cross(v3-v1);
-			n.normalize();
-			normals.at(a) += n;
-			normals.at(b) += n;
-			normals.at(c) += n;
-			normals.at(d) += n;
-
+			std::cout<< "face "<<i<<": "<<a<<" "<<b<<" "<<c<<" "<<d<<std::endl;
+			Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
+							_vertices[str + boost::lexical_cast<std::string>(b)],
+							_vertices[str + boost::lexical_cast<std::string>(c)]);
+			//TODO: which material?			
+			t->setMaterial(&_materials[ "mat1" ]);
+			_objects.push_back(t);
+			t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
+						_vertices[str + boost::lexical_cast<std::string>(c)],
+						_vertices[str + boost::lexical_cast<std::string>(d)]);
+			t->setMaterial(&_materials[ "mat1" ]);
+			_objects.push_back(t);
 		}else if(3==n){
 			long a,b,c;
 			file >> line; a = atol(line.c_str());
 			file >> line; b = atol(line.c_str());
 			file >> line; c = atol(line.c_str());
-			triangleList.push_back( boost::make_tuple(a,b,c) );
-			//create Normal
-			const Vector3& v1 = _vertices[ str + boost::lexical_cast<std::string>(a) ];
-			const Vector3& v2 = _vertices[ str + boost::lexical_cast<std::string>(b) ];
-			const Vector3& v3 = _vertices[ str + boost::lexical_cast<std::string>(c) ];
-			Vector3 n = (v2-v1).cross(v3-v1);
-			n.normalize();
-			normals.at(a) += n;
-			normals.at(b) += n;
-			normals.at(c) += n;
-
+			std::cout<< "face "<<i<<": "<<a<<" "<<b<<" "<<c<<std::endl;
+			Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
+							_vertices[str + boost::lexical_cast<std::string>(b)],
+							_vertices[str + boost::lexical_cast<std::string>(c)]);
+			//TODO: which material?			
+			t->setMaterial(&_materials[ "mat1" ]);
+			_objects.push_back(t);
 		}else{
 			std::cout<<"WARNING: "<< n <<" vertices per face not supported!"<<std::endl;	
 			return;	
 		}
 	}
-
-	//actually create all faces and all cor. normals
-	for(unsigned int i=0; i<triangleList.size(); ++i){
-		long a = triangleList.at(i).get<0>();
-		long b = triangleList.at(i).get<1>();
-		long c = triangleList.at(i).get<2>();
-		Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
-						_vertices[str + boost::lexical_cast<std::string>(b)],
-						_vertices[str + boost::lexical_cast<std::string>(c)]);
-		t->setMaterial(&_materials[ material ]);
-		t->setNormals( normals.at(a), normals.at(b), normals.at(c) );
-		_objects.push_back(t);	
-	}
-
-
 }
 
 
