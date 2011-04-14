@@ -267,8 +267,34 @@ std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays() const{
 }
 
 
+std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays(int rank,int size) const{
+	std::vector<PrimaryRayBundle> primRays;
+	int stepsize = _tracedImage.getWidth()/size+1;
+	for(unsigned int i = rank*stepsize; i< std::min((int)_tracedImage.getWidth(),(rank+1)*stepsize); ++i)
+		 	for(unsigned int j= 0; j< _tracedImage.getHeight(); ++j){
+		 		PrimaryRayBundle pr;
+		 		pr.x=i; pr.y=j;
+		 		Ray ray;
+		 		ray.setRaydepth(_maxRayDepth);
+		 		ray.setOrigin(_eye);
+		 		Vector3 dir = _upperLeftCorner 
+						+ (_right * (_width*i/_tracedImage.getWidth()) ) 
+						+ (_down * (_height*j/_tracedImage.getHeight()) )
+						- _eye;
+				dir.normalize();
+				ray.setDirection( dir );				
+		 		pr.r = ray;
+		 		pr.sampling = 1;
+		 		primRays.push_back(pr);
+		 	}
+	return primRays;
+}
+
+
+
+
 //replace by recursive ray calculation and color calculation, has to return a color
-Color Raytracer::traceRay(const Ray& ray){
+Color Raytracer::traceRay(const Ray& ray) const{
 	Color col = Color(0,0,0);
 	
 	//intersection Informations
@@ -298,17 +324,17 @@ Color Raytracer::traceRay(const Ray& ray){
 }
 
 
-void Raytracer::traceRays(const std::vector<PrimaryRayBundle>& rays){
-	int num_threads = 2*omp_get_max_threads();
+void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
+	int num_threads = 20*omp_get_max_threads();
 
 	TracingFunctor t_func( *this );
 	std::cout<< rays.size()<<" rays to trace"<<std::endl;
 /*
 	//build blocks
-	typedef std::vector<PrimaryRayBundle>::const_iterator RayIter;
+	typedef std::vector<PrimaryRayBundle>::iterator RayIter;
 	std::vector< std::pair<RayIter,RayIter> > rayblocks;
 	int stepsize = rays.size()/num_threads;
-	int count = 0;
+	unsigned int count = 0;
 	RayIter a=rays.begin();
 	while(count+stepsize<rays.size()){
 		rayblocks.push_back( std::make_pair(a,a+stepsize) );
@@ -321,16 +347,28 @@ void Raytracer::traceRays(const std::vector<PrimaryRayBundle>& rays){
 	}
 	std::cout<<"build "<<rayblocks.size()<<" blocks"<<std::endl;
 	
-	//#pragma omp parallel for
-	for(unsigned int i=0; i<rayblocks.size();++i)
-		t_func(rayblocks.at(i).first,rayblocks.at(i).second);
+	unsigned int i;
+	#pragma omp parallel shared(rayblocks) private(i)
+  	{
+
+		#pragma omp for schedule(dynamic) nowait
+		for(i=0; i<rayblocks.size();++i)
+			t_func(rayblocks.at(i).first,rayblocks.at(i).second);
+	}
 	*/
+
+
+	/*
+	/*forks off the threads*/
+	//omp_set_num_threads(20);
+	#pragma omp parallel for schedule(dynamic)
+	for(unsigned int i=0; i<rays.size();++i){
+		doWork(rays[i]);
+	}
 	
-	#pragma omp parallel for
-	for(unsigned int i=0; i<rays.size();++i)
-		t_func(rays.at(i));
-	
-	
+	for(unsigned int i=0; i<rays.size();++i)		
+		_tracedImage.at( rays[i].x, rays[i].y ) = rays[i].color;	
+
 }
 
 
@@ -341,27 +379,27 @@ Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) co
 	Color c =  _ambient*local_color *m.getAmbient(); //ambient term
 	//diffuse term
 	for(unsigned int i=0; i<_lights.size() ; ++i){
-		if( inShadow(hitpoint,_lights.at(i).getPosition()))
+		if( inShadow(hitpoint,_lights[i].getPosition()))
 			continue;
-		Vector3 lightdir = _lights.at(i).getPosition() - hitpoint;
+		Vector3 lightdir = _lights[i].getPosition() - hitpoint;
 		lightdir.normalize();
 		//TODO get shadow percentage
-		c += _lights.at(i).getIntensity()*_lights.at(i).getColor()*m.getDiffuse()*local_color 
+		c += _lights[i].getIntensity()*_lights[i].getColor()*m.getDiffuse()*local_color 
 				*std::max(real(0),inter.normal.dot(lightdir));
 	}
 	
 	//specular term
 	for(unsigned int i=0; i<_lights.size() ; ++i){
-		if( inShadow(hitpoint,_lights.at(i).getPosition()))
+		if( inShadow(hitpoint,_lights[i].getPosition()))
 			continue;
-		Vector3 lightdir = _lights.at(i).getPosition() - hitpoint;
+		Vector3 lightdir = _lights[i].getPosition() - hitpoint;
 		lightdir.normalize();
 		Vector3 toEye = _eye - hitpoint;
 		toEye.normalize();
 		Vector3 h  = lightdir + toEye;
 		h.normalize();
 		//TODO get shadow percentage and nearest lightpoint
-		c += _lights.at(i).getIntensity()*_lights.at(i).getColor()*m.getSpecular()
+		c += _lights[i].getIntensity()*_lights[i].getColor()*m.getSpecular()
 			* std::pow(std::max(real(0),inter.normal.dot(h)),m.getShininess());
 	}
 	
@@ -375,8 +413,8 @@ void Raytracer::antialiase(bool debug){
 	std::vector<std::vector<bool> > edges = _tracedImage.findEdges();
 	std::vector<PrimaryRayBundle> aliasedRays;	
 	for(unsigned int i= 0; i< edges.size(); ++i)
-		 	for(unsigned int j= 0; j< edges.at(i).size(); ++j)
-		 		if(edges.at(i).at(j)){
+		 	for(unsigned int j= 0; j< edges[i].size(); ++j)
+		 		if(edges[i][j]){
 		 			if(debug){
 		 				_tracedImage.at(i,j) = Color(1,0,0);
 		 			}else{
@@ -410,10 +448,26 @@ void Raytracer::trace(){
 	time_t start,stop;
 	
 	time(&start);
-	std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
-	traceRays(primRays);
-	std::cout<<"start antialiasing"<<std::endl;
-	antialiase(); //remove ugly egdes
+
+	
+	int rank, size;
+	std::vector<PrimaryRayBundle> primRays;
+	//#pragma omp parallel private (rank, size, primRays) default(none)	
+	{
+
+		rank = omp_get_thread_num();
+		size = omp_get_num_threads();
+
+		primRays = generatePrimaryRays(rank,size);//generate rays
+		traceRays(primRays);
+		//std::cout<<"start antialiasing"<<std::endl;
+		//TODO: rank,size antialiase(); //remove ugly egdes
+	}
+	
+	//std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
+	//traceRays(primRays);
+	
+
 	time(&stop);
 	std::cout<<"Runtime: "<<difftime(stop,start)<<" seconds."<<std::endl;
 }
@@ -429,7 +483,7 @@ bool Raytracer::inShadow(const Vector3& coord, const Vector3& light) const{
 		//prevent jumps on uninitialised values
 		inter.t = -1; 
 
-		inter =_objects.at(i)->getIntersection(ray);
+		inter =_objects[i]->getIntersection(ray);
 		if(inter.t > eps )
 			if(inter.t < distance)
 				return true;
@@ -529,10 +583,10 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 			const Vector3& v3 = _vertices[ str + boost::lexical_cast<std::string>(c) ];
 			Vector3 n = (v2-v1).cross(v3-v1);
 			n.normalize();
-			normals.at(a) += n;
-			normals.at(b) += n;
-			normals.at(c) += n;
-			normals.at(d) += n;
+			normals[a] += n;
+			normals[b] += n;
+			normals[c] += n;
+			normals[d] += n;
 
 		}else if(3==n){
 			long a,b,c;
@@ -546,9 +600,9 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 			const Vector3& v3 = _vertices[ str + boost::lexical_cast<std::string>(c) ];
 			Vector3 n = (v2-v1).cross(v3-v1);
 			n.normalize();
-			normals.at(a) += n;
-			normals.at(b) += n;
-			normals.at(c) += n;
+			normals[a] += n;
+			normals[b] += n;
+			normals[c] += n;
 
 		}else{
 			std::cout<<"WARNING: "<< n <<" vertices per face not supported!"<<std::endl;	
@@ -558,14 +612,14 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 
 	//actually create all faces and all cor. normals
 	for(unsigned int i=0; i<triangleList.size(); ++i){
-		long a = triangleList.at(i).get<0>();
-		long b = triangleList.at(i).get<1>();
-		long c = triangleList.at(i).get<2>();
+		long a = triangleList[i].get<0>();
+		long b = triangleList[i].get<1>();
+		long c = triangleList[i].get<2>();
 		Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
 						_vertices[str + boost::lexical_cast<std::string>(b)],
 						_vertices[str + boost::lexical_cast<std::string>(c)]);
 		t->setMaterial(&_materials[ material ]);
-		t->setNormals( normals.at(a), normals.at(b), normals.at(c) );
+		t->setNormals( normals[a], normals[b], normals[c] );
 		_objects.push_back(t);	
 	}
 

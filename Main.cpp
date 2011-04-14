@@ -12,6 +12,10 @@
 int main(int args, char** argv){
 	
 
+	//#pragma omp parallel
+	{
+
+
 	Raytracer rt;
 	if(args==2){
 		rt.loadScene(std::string(argv[1]));
@@ -19,5 +23,8 @@ int main(int args, char** argv){
 		rt.loadDefaultScene();
 	rt.trace(); 
 	rt.saveImage("traced.png");
+	}
+
 }
+
 
