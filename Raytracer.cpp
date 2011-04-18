@@ -3,6 +3,7 @@
 #include "pugiconfig.hpp"
 #include "MonochromaticTexture.h"
 #include "ImageTexture.h"
+#include "ChessboardTexture.h"
 
 #include <ctime>
 #include <algorithm>
@@ -33,21 +34,26 @@ void Raytracer::loadDefaultScene(){
 		_ambient = 0.05*Color(1,1,1);
 		
 		//KD-Tree objects
-		Material mat1,mat2,mat3,mat4;
-		Texture *red,*green,*white,*blueish;
+		Material mat1,mat2,mat3,mat4,mat5;
+		Texture *red,*green,*white,*blueish,*chessboard;
 		red = new MonochromaticTexture(1,0,0);  
 		green = new MonochromaticTexture(0,1,0);  
 		white = new MonochromaticTexture(1,1,1); 
-		blueish = new MonochromaticTexture(0.0,0.0,0.3);  
+		blueish = new MonochromaticTexture(0.0,0.0,0.3); 
+		chessboard = new ChessboardTexture(); 
+
 		mat1.setTexture(red);
 		mat2.setTexture(green);
 		mat3.setTexture(white);	
 		mat4.setTexture(blueish);
+		mat5.setTexture(chessboard);
 		
 		mat4.setSpecular(0.2);	
 		mat4.setShininess(64);
 		_materials["mat1"] = mat1;_materials["mat2"] = mat2;
 		_materials["mat3"] = mat3;_materials["mat4"] = mat4;
+		_materials["mat5"] = mat5;
+		
 	
 		_vertices["LUH"] = Vector3(-1,-1,3);
 		_vertices["RUH"] = Vector3(1,-1,3);
@@ -85,10 +91,12 @@ void Raytracer::loadDefaultScene(){
 
 		//unten
 		t = new Triangle(_vertices["LUV"],_vertices["LUH"],_vertices["RUH"]);
-		t->setMaterial(&_materials["mat3"]);
+		t->setMaterial(&_materials["mat5"]);
+		t->setTextureCoords("0 0 1 0 1 1");
 		_objects.push_back(t);//pointers because of polymorphism
 		t = new Triangle(_vertices["LUV"],_vertices["RUH"],_vertices["RUV"]);
-		t->setMaterial(&_materials["mat3"]);
+		t->setMaterial(&_materials["mat5"]);
+		t->setTextureCoords("0 0 1 1 0 1");
 		_objects.push_back(t);//pointers because of polymorphism
 
 
