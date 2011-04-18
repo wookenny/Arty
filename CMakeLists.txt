@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Arty)
 
 #specific compiler settings
-set(CMAKE_CXX_FLAGS "-g -Wall -fopenmp -mfpmath=sse -O3 -m64 -pipe -fmessage-length=0 -D_FORTIFY_SOURCE=2 -fstack-protector -funwind-tables -fasynchronous-unwind-tables -D_REENTRANT -lz -lpng -DNO_FREETYPE -Wno-write-strings")
+set(CMAKE_CXX_FLAGS " -g -Wall -fopenmp  -O3 -m64  -pipe -fmessage-length=0 -D_FORTIFY_SOURCE=2 -fstack-protector -funwind-tables -fasynchronous-unwind-tables -D_REENTRANT -lz -lpng -DNO_FREETYPE -Wno-write-strings")
 
 
 
@@ -15,6 +15,9 @@ Color.h
 common.h
 Image.cpp
 Image.h
+Texture.h
+MonochromaticTexture.h
+ImageTexture.h
 Lightsource.h
 Main.cpp
 Material.h

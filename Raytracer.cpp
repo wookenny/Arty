@@ -1,6 +1,8 @@
 #include "Raytracer.h"
 #include "pugixml.hpp"
 #include "pugiconfig.hpp"
+#include "MonochromaticTexture.h"
+#include "ImageTexture.h"
 
 #include <ctime>
 #include <algorithm>
@@ -32,10 +34,16 @@ void Raytracer::loadDefaultScene(){
 		
 		//KD-Tree objects
 		Material mat1,mat2,mat3,mat4;
-		mat1.setColor(Color(1,0,0));
-		mat2.setColor(Color(0,1,0));		
-		mat3.setColor(Color(1,1,1));	
-		mat4.setColor(Color(0.0,0.0,0.3));
+		Texture *red,*green,*white,*blueish;
+		red = new MonochromaticTexture(1,0,0);  
+		green = new MonochromaticTexture(0,1,0);  
+		white = new MonochromaticTexture(1,1,1); 
+		blueish = new MonochromaticTexture(0.0,0.0,0.3);  
+		mat1.setTexture(red);
+		mat2.setTexture(green);
+		mat3.setTexture(white);	
+		mat4.setTexture(blueish);
+		
 		mat4.setSpecular(0.2);	
 		mat4.setShininess(64);
 		_materials["mat1"] = mat1;_materials["mat2"] = mat2;
@@ -172,7 +180,11 @@ void Raytracer::loadScene(const std::string &xmlfile){
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		std::string name = it->attribute("Name").value();		
 		Material tmpmat;
-		tmpmat.setColor(Color(it->attribute("Color").value()));
+		if( it->attribute("Color") ){
+			//TODO: get rid of the memory
+			Texture *tex = new MonochromaticTexture(Color(it->attribute("Color").value()));
+			tmpmat.setTexture(tex);
+		}
 		if( it->attribute("Specular") )
 			tmpmat.setSpecular(it->attribute("Specular").as_float());
 		if( it->attribute("Shininess") )
@@ -181,8 +193,8 @@ void Raytracer::loadScene(const std::string &xmlfile){
 			tmpmat.setReflection(it->attribute("Reflection").as_float());
 		if( it->attribute("Texture") ){
 			//TODO get rid of memory
-			Image *img = new Image(it->attribute("Texture").value());
-			tmpmat.setTexture(img);	
+			Texture *tex = new ImageTexture(it->attribute("Texture").value());
+			tmpmat.setTexture(tex);	
 		}
 		_materials[name] = tmpmat;
 
@@ -295,39 +307,14 @@ Color Raytracer::traceRay(const Ray& ray){
 
 
 void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
-	int num_threads = 2*omp_get_max_threads();
 
-	TracingFunctor t_func( *this );
-	//std::cout<< rays.size()<<" rays to trace"<<std::endl;
-/*
-	//build blocks
-	typedef std::vector<PrimaryRayBundle>::const_iterator RayIter;
-	std::vector< std::pair<RayIter,RayIter> > rayblocks;
-	int stepsize = rays.size()/num_threads;
-	int count = 0;
-	RayIter a=rays.begin();
-	while(count+stepsize<rays.size()){
-		rayblocks.push_back( std::make_pair(a,a+stepsize) );
-		a += stepsize;
-		count += stepsize;	
-	}
-	if(a!=rays.end()){
-		std::pair<RayIter,RayIter> rpair = 	std::make_pair(a,rays.end());
-		rayblocks.push_back(rpair );
-	}
-	std::cout<<"build "<<rayblocks.size()<<" blocks"<<std::endl;
-	
-	//#pragma omp parallel for
-	for(unsigned int i=0; i<rayblocks.size();++i)
-		t_func(rayblocks.at(i).first,rayblocks.at(i).second);
-	*/
 	unsigned int i;
-	
-	//#pragma omp parallel for private(i) shared(t_func) schedule(dynamic)
-	//#pragma omp parallel shared(t_func)
-	{	
-	#pragma omp parallel for schedule(dynamic)
-	for(i=0; i<rays.size();++i)
+
+
+	Raytracer &rt = *this;
+	TracingFunctor t_func( rt );
+	#pragma omp parallel for schedule(dynamic) 
+	for(i=0; i<rays.size();++i){
 		t_func(rays.at(i));
 	}
 	
@@ -459,9 +446,9 @@ void Raytracer::loadOFF_File(const std::string &str, real x_min,
 	real x1,x2,y1,y2,z1,z2; x1=x2=y1=y2=z1=z2=0;
 	for(long i = 0; i<numVertices;++i){
 		real x,y,z;
-		file >> line; x = real(atof(line.c_str()));
-		file >> line; z = real(atof(line.c_str()));
-		file >> line; y = real(atof(line.c_str()));
+		file >> line; x =  -real(atof(line.c_str()));
+		file >> line; y =  real(atof(line.c_str()));
+		file >> line; z =  -real(atof(line.c_str()));
 
 		if(0==i){//init values
 			x1 = x2 = x;
