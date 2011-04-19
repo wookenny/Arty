@@ -44,7 +44,8 @@ class Raytracer{
 
 		//methods used by the raytracer
 		std::vector<PrimaryRayBundle> generatePrimaryRays() const;
-		Color traceRay(const Ray&);
+		std::vector<PrimaryRayBundle> generatePrimaryRays(int rank,int size) const;
+		Color traceRay(const Ray&) const;
 		void traceRays(std::vector<PrimaryRayBundle>&);
 		void antialiase(bool debug = false);
 		Color localColor(const IntersectionCompound&,const Ray&) const;
@@ -55,7 +56,7 @@ class Raytracer{
 		
 		
 	
-		inline void doWork(PrimaryRayBundle &raybundle) const {
+		inline void doWork(PrimaryRayBundle &raybundle){
 			Color &col = raybundle.color;//_tracedImage.at( raybundle.x, raybundle.y);
 			col = Color(0,0,0);
 			//trace all rays and average the resulting color

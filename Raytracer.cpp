@@ -290,7 +290,7 @@ std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays(int rank,int size) 
 
 
 //replace by recursive ray calculation and color calculation, has to return a color
-Color Raytracer::traceRay(const Ray& ray) const{
+Color Raytracer::traceRay(const Ray& ray)const{
 	Color col = Color(0,0,0);
 	
 	//intersection Informations
