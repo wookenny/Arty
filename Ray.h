@@ -16,6 +16,7 @@ public:
 	//getter
 	const Vector3& getOrigin() const{ return _origin; }	
 	const Vector3& getDirection() const{ return _direction; }	
+	Vector3& Direction() { return _direction; }		
 	int getDepth() const{ return _raydepth; }
 
 

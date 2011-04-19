@@ -13,20 +13,22 @@
 
 	<Lights>
 		<Light Name="ambient light" Color="0.5 0.5 0.5" Type="ambient" />
-		<Light Name="Light 1" Color="1 1 1" Position="0 2 1"  Intensity = "0.5" Type="point" />	
+		<Light Name="Light 1" Color="1 1 1" Position="0 2 1"  Intensity = "4" Type="point" />	
 	</Lights>
 
 	<Materials>
 		<Material Name="mat1" Color="1 0 0" />
-		<Material Name="mat2" Color="1 1 0" />
+		<Material Name="mat2" Color="1 1 0" Texture="lena.png"/>
 		<Material Name="mat3" Color="1 1 1" />
-		<Material Name="mat4" Color="0 0 0.3" Specular="0.2" Shininess="64"/>
+		<Material Name="mat4" Color="0 0 1" Specular="0.2" Shininess="64" Reflection="0.3"/>
+		<Material Name="mat5" Color="0.7 0.8 0.4" Specular="0.5" Shininess="256" Reflection="0.2"/>
 	</Materials>
 
 	<Geometry>
 		<Implicits>
-			<!--			
-			<Object Name="DebugSphere" Type="Sphere" Position="0 0 2" Radius="0.5" Material="mat4"/>
+			<Object Name="Sphere4" Type="Sphere" Position="-.3 0.5 2.3" Radius="0.1" Material="mat1"/>
+			<Object Name="Sphere5" Type="Sphere" Position=".3 0.3 2" Radius="0.3" Material="mat5"/>
+			<!--<Object Name="DebugSphere" Type="Sphere" Position="0 0 2" Radius="0.5" Material="mat4"/>
 			<Object Name="Sphere1" Type="Sphere" Position=".3 -0.7 2" Radius="0.3" Material="mat4"/>
 			<Object Name="Sphere2" Type="Sphere" Position=".3 0.7 2.8" Radius="0.1" Material="mat4"/>
 			<Object Name="Sphere3" Type="Sphere" Position="-.3 -0.7 1.5" Radius="0.1" Material="mat4"/>
@@ -44,20 +46,20 @@
 			<Point Name="LOV" Position="-1 1 1"/>
 		</Points>
 		<Triangles>
-			<Triangle Name="hinten1" A="LUH" B="ROH" C="RUH" Material="mat3"/>
-			<Triangle Name="hinten2" A="LUH" B="LOH" C="ROH" Material="mat3"/>
+			<Triangle Name="hinten1" A="LUH" B="ROH" C="RUH" Material="mat3" />
+			<Triangle Name="hinten2" A="LUH" B="LOH" C="ROH" Material="mat3" />
 
-			<Triangle Name="links1" A="LUV" B="LOH" C="LUH" Material="mat1"/>
-			<Triangle Name="links2" A="LUV" B="LOV" C="LOH" Material="mat1"/>
+			<Triangle Name="links1" A="LUV" B="LOH" C="LUH" Material="mat1" />
+			<Triangle Name="links2" A="LUV" B="LOV" C="LOH" Material="mat1" />
 
-			<Triangle Name="rechts1" A="RUV" B="RUH" C="ROH" Material="mat2"/>
-			<Triangle Name="rechts2" A="RUV" B="ROH" C="ROV" Material="mat2"/>
+			<Triangle Name="rechts1" A="RUV" B="RUH" C="ROH" Material="mat2"  TextureCoords="0 0 1 0 1 1"/>
+			<Triangle Name="rechts2" A="RUV" B="ROH" C="ROV" Material="mat2"  TextureCoords="0 0 1 1 0 1"/>
 	
-			<Triangle Name="unten1" A="LUV" B="LUH" C="RUH" Material="mat3"/>
-			<Triangle Name="unten2" A="LUV" B="RUH" C="RUV" Material="mat3"/>
+			<Triangle Name="unten1" A="LUV" B="LUH" C="RUH" Material="mat3" />
+			<Triangle Name="unten2" A="LUV" B="RUH" C="RUV" Material="mat3" />
 		</Triangles>
 		<OFF>
-			<OFF-Mesh Name="teapot.off" Material="mat4" x1 = "-.8" x2 =".3" y1 ="-1" y2 ="0.85" z1 ="2" z2 ="3">
+			<OFF-Mesh Name="teapot.off" Material="mat4" x1 = "-.8" x2 =".3" y1 ="-1" y2 ="0.85" z1 ="2" z2 ="3"/>
 		</OFF>
 	</Geometry>
 

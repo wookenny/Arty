@@ -1,6 +1,6 @@
 #include "Image.h"
 #include "pngwriter.h"
-
+#include <cassert>
 //for writing jpgs
 
 
@@ -8,8 +8,30 @@
 real Image::_gamma = 2.2;
 
 Image::Image(unsigned int width, unsigned int height){
+
 	_data = std::vector<std::vector<Color> >( width, std::vector<Color>( height, Color(0,0,0) ) );
 }
+
+
+Image::Image(const std::string file){
+
+	pngwriter img(1/*width*/, 1/*height*/, 0.0/*bg color*/, file.c_str());
+	img.readfromfile( file.c_str() );
+
+	_data = std::vector<std::vector<Color> >( img.getwidth() , 
+											std::vector<Color>( img.getheight(), Color(0,0,0) ) );	
+	
+	
+	for(unsigned int i=0; i<_data.size();++i){
+		for(unsigned int j=0; j<_data.at(i).size();++j){
+			Color c(real(img.read(i+1,j+1,1))/65536.,
+					real(img.read(i+1,j+1,2))/65536.,
+					real(img.read(i+1,j+1,3))/65536. );
+			_data.at(i).at(j) = c;
+		}
+	}
+}
+
 
 void Image::gammaCorrection(){
 	for(unsigned int i=0; i<_data.size();++i)
@@ -26,14 +48,14 @@ void Image::exposureCorrection(){
 
 void Image::save(const std::string& filename){
 	/** shift colors **/
-	//exposureCorrection();  //not quite good, somethiong has to be done
+	exposureCorrection();  //not quite good, somethiong has to be done
 	gammaCorrection();	
 
 	pngwriter writer(getWidth(), getHeight(), 0.0, filename.c_str());
 	for(unsigned int i=0; i<_data.size();++i)
 		for(unsigned int j=0; j<_data.at(i).size();++j){
 			Color c = _data.at(i).at(j);
-			writer.plot(i,getHeight()-1-j, c.getRed(), c.getGreen(), c.getBlue()); 
+			writer.plot(i+1,getHeight()-j, c.getRed(), c.getGreen(), c.getBlue()); 
 		}	
 	writer.write_png();
 }

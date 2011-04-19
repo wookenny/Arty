@@ -44,8 +44,7 @@ class Raytracer{
 
 		//methods used by the raytracer
 		std::vector<PrimaryRayBundle> generatePrimaryRays() const;
-		std::vector<PrimaryRayBundle> generatePrimaryRays(int i,int n) const;
-		Color traceRay(const Ray&) const;
+		Color traceRay(const Ray&);
 		void traceRays(std::vector<PrimaryRayBundle>&);
 		void antialiase(bool debug = false);
 		Color localColor(const IntersectionCompound&,const Ray&) const;
@@ -121,9 +120,8 @@ struct TracingFunctor{
 	
 	}
 
-	
-	inline void operator()(const std::vector<PrimaryRayBundle>::iterator a,
-					 const std::vector<PrimaryRayBundle>::iterator b) {
+	inline void operator()(std::vector<PrimaryRayBundle>::iterator a,
+					  std::vector<PrimaryRayBundle>::iterator b) {
 		std::vector<PrimaryRayBundle>::iterator iter = a;
 		while(iter != b){	
 			operator()(*iter);
@@ -132,8 +130,8 @@ struct TracingFunctor{
 	}
 	
 
-	inline void operator() (PrimaryRayBundle &raybundle) {
-		Color &col = _rt._tracedImage.at( raybundle.x, raybundle.y);
+	inline void operator() ( PrimaryRayBundle &raybundle) {
+		Color &col =  _rt._tracedImage.at( raybundle.x, raybundle.y);
 		col = Color(0,0,0);
 		//trace all rays and average the resulting color
 		int s = raybundle.sampling; 
@@ -147,17 +145,17 @@ struct TracingFunctor{
 				real rightShift = _rt._width*(raybundle.x+( (n%2==0?.5:-.5)*real(n)/s))/_rt._tracedImage.getWidth();
 				real downShift = _rt._height*(raybundle.y+( (m%2==0?.5:-.5)*real(m)/s))/_rt._tracedImage.getHeight();
 				Vector3 &dir = ray.Direction();
-				dir = _rt._upperLeftCorner + _rt._right * rightShift  
-							   + _rt._down * downShift
-							   - _rt._eye;
+				dir = _rt._upperLeftCorner 
+							+ _rt._right * rightShift  
+							+ _rt._down * downShift
+							- _rt._eye;
 				dir.normalize();
 				col += _rt.traceRay(ray);
 				}
 				
-		_rt._tracedImage.at( raybundle.x, raybundle.y) /=(s*s);
+		col/=(s*s);
 		//highlight edges
-		if(s>1 and _showEdges)
-			_rt._tracedImage.at( raybundle.x, raybundle.y) = Color(1,0,0);
-		
+		if(s>1&&_showEdges)
+			col = Color(1,0,0);
 	}
 };

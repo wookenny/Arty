@@ -7,6 +7,8 @@ class Triangle: public Obstacle{
 		Vector3  _v1,_v2,_v3;
 		Vector3 _normal;
 		Vector3 _normals[3];
+		real _px[3]; //texture coordinates
+		real _py[3]; //texture coordinates
 		bool _normalsSet;		
 				
 
@@ -38,4 +40,7 @@ class Triangle: public Obstacle{
 			_normals[0].normalize();_normals[1].normalize();_normals[2].normalize();
 			_normalsSet = true;
 		}
+
+		void setTextureCoords(std::string coords);
+
 };
