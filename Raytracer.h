@@ -12,6 +12,7 @@
 #include "Image.h"
 #include "Lightsource.h"
 #include "Color.h"
+#include "Texture.h"
 
 struct PrimaryRayBundle{
 	Ray r;

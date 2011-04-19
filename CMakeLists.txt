@@ -15,6 +15,10 @@ Color.h
 common.h
 Image.cpp
 Image.h
+Texture.h
+MonochromaticTexture.h
+ChessboardTexture.h
+ImageTexture.h
 Lightsource.h
 Main.cpp
 Material.h
