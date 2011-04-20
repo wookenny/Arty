@@ -332,7 +332,7 @@ void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
 Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) const{
 	Material &m = *inter.mat;
 	Vector3 hitpoint = ray.getOrigin()+inter.t * ray.getDirection();
-	Color local_color = m.getColor(inter.px,inter.py);
+	Color local_color = m.getColor(inter);
 	Color c =  _ambient*local_color *m.getAmbient(); //ambient term
 	//diffuse term
 	for(unsigned int i=0; i<_lights.size() ; ++i){

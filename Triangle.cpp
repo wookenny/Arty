@@ -46,7 +46,8 @@ IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
 		return ic;
 	}
 	
-	Vector3 point = ray.getOrigin()+distance*ray.getDirection();		
+	Vector3 &point = ic.hitpoint;
+	point = ray.getOrigin()+distance*ray.getDirection();		
 	ic.t=distance;
 
 	//find dominat axis

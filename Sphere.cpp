@@ -14,7 +14,8 @@ IntersectionCompound Sphere::getIntersection(const Ray& ray) const{
 	if( D > 0){ //ray hits sphere?
 		real param = -B - sqrt(D);
 		c.t = param;
-		Vector3 hitpoint = ray.getOrigin() + param*ray.getDirection();
+		Vector3 &hitpoint = c.hitpoint;
+		hitpoint = ray.getOrigin() + param*ray.getDirection();
 		c.normal = (hitpoint -_center).normalize();
 		//parametric coords TODO: find formula
 		c.px = (_radius + hitpoint[0] - _center[0])/(2*_radius);

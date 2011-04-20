@@ -10,5 +10,5 @@ class MonochromaticTexture: public Texture{
 		MonochromaticTexture(): _c(Color(1,1,1)){}
 		MonochromaticTexture(real r, real g, real b):_c(Color(r,g,b)){}
 		MonochromaticTexture(const Color c):_c(c){}
-		Color at(real x, real y) const{ return _c; }
+		Color at(const IntersectionCompound&) const{ return _c; }
 };

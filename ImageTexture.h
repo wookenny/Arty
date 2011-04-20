@@ -2,6 +2,7 @@
 
 #include "Color.h"
 #include "Image.h"
+#include "Obstacle.h"
 
 class ImageTexture: public Texture{
 
@@ -10,7 +11,7 @@ class ImageTexture: public Texture{
 	public:
 		ImageTexture(const std::string name):_img(new Image(name)){}
 		~ImageTexture(){ delete _img;}
-		Color at(real x, real y) const{
-			return _img->relAt(x,y);			
+		Color at(const IntersectionCompound& ic) const{
+			return _img->relAt(ic.px,ic.py);			
 		}
 };
