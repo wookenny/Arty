@@ -42,7 +42,7 @@ class Material{
 		void setReflection(real r){ k_reflection = r;}
 		void setTexture(const Texture* t){ _texture = t;}
 		//get color
-		Color getColor(real x, real y) const{ return _texture->at(x,y);}		
+		Color getColor(const IntersectionCompound& c) const{ return _texture->at(c);}		
 
 };
 
