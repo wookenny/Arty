@@ -31,6 +31,8 @@ pugixml.cpp
 Ray.h
 Raytracer.cpp
 Raytracer.h
+Scene.h
+Scene.cpp
 Sphere.cpp
 Sphere.h
 Triangle.cpp
