@@ -12,7 +12,8 @@ struct IntersectionCompound{
 	Material *mat;
 	real t;
 	Vector3 normal;
-	real px,py;//parametrisierungskoeffizienten, für texturen	
+	real px,py; //barycentric coords for 2d textures
+	Vector3 hitpoint; //real coordinates for 3d textures	
         
 	 IntersectionCompound():mat(0),t(std::numeric_limits<real>::infinity() ),normal(1,0,0),px(0),py(0){}
 

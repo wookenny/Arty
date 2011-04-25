@@ -26,7 +26,7 @@ Triangle::Triangle( const Vector3& v1, const Vector3& v2, const Vector3& v3){
 	_ud2 = - _c[1]/_div1;
 	_vd1 =   _b[0]/_div2;
 	_vd2 = - _b[1]/_div2;
-	_px[0] = _px[1] = _px[2] = _py[0] = _py[1] = _py[2] = 0; 	
+	_px[0] = _px[1] = _px[2] = _py[0] = _py[1] = _py[2] = -1; 	
 }
 
 IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
@@ -46,7 +46,8 @@ IntersectionCompound Triangle::getIntersection(const Ray& ray) const{
 		return ic;
 	}
 	
-	Vector3 point = ray.getOrigin()+distance*ray.getDirection();		
+	Vector3 &point = ic.hitpoint;
+	point = ray.getOrigin()+distance*ray.getDirection();		
 	ic.t=distance;
 
 	//find dominat axis
