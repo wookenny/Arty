@@ -53,7 +53,7 @@ class Raytracer{
 
 struct TracingFunctor{
 
-	const Raytracer& _rt;
+	Raytracer _rt;
 	bool _showEdges;
 	
 	TracingFunctor(const Raytracer& rt,bool edges = false):_rt(rt),_showEdges(edges){

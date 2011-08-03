@@ -1,6 +1,6 @@
 #include "Triangle.h"
 #include <sstream>
-
+#include <cstdlib>
 
 Triangle::Triangle( const Vector3& v1, const Vector3& v2, const Vector3& v3){
 	_v1=v1; _v2=v2; _v3=v3;
