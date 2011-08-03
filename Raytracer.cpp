@@ -103,6 +103,7 @@ void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
 	const Raytracer &rt = *this;
 	TracingFunctor t_func( rt );
 	//#pragma omp parallel for shared(rt) schedule(dynamic) 
+	//#pragma omp parallel for
 	for(i=0; i<rays.size();++i){
 		t_func(rays.at(i));
 	}
