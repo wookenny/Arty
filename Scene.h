@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <string>
 #include <vector>
 #include "Color.h"
@@ -31,8 +31,8 @@ class Scene{
 		std::vector<Texture*> _textures;//pointers because of polymorphism
 
 		std::vector<Lightsource> _lights;
-		boost::unordered_map<std::string, Vector3> _vertices;
-		boost::unordered_map<std::string, Material> _materials;
+		std::unordered_map<std::string, Vector3> _vertices;
+		std::unordered_map<std::string, Material> _materials;
 
 
 		//ambient lightning

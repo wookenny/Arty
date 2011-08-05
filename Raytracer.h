@@ -29,7 +29,7 @@ class Raytracer{
 		bool _debug;
 		//methods used by the raytracer
 		std::vector<PrimaryRayBundle> generatePrimaryRays() const;
-		std::vector<PrimaryRayBundle> generatePrimaryRays(int rank,int size) const;
+		std::vector<PrimaryRayBundle> generatePrimaryRays(int x, int x_stepx, int y, int y_step) const;
 		Color traceRay(const Ray&) const;
 		void traceRays(std::vector<PrimaryRayBundle>&);
 		std::vector<PrimaryRayBundle> generateAliasedRays(bool debug = false) const;

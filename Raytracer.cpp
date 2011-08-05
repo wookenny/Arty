@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-
+#include <thread>
 #include <fstream>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -36,12 +36,12 @@ std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays() const{
 }
 
 
-std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays(int rank,int size) const{
-	std::vector<PrimaryRayBundle> primRays;
+std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays(int x, int x_step, int y, int y_step) const{
+	std::vector<PrimaryRayBundle>  primRays;
 	const Image& img = _scene.getImage();
-	int stepsize = img.getWidth()/size+1;
-	for(int i = rank*stepsize;	i< std::min((int)img.getWidth(),(rank+1)*stepsize);	++i)
-		 	for(unsigned int j= 0; j< img.getHeight(); ++j){
+
+	for(int i = x;	i< std::min(static_cast<int>(img.getWidth()),(x+1)*x_step);++i)
+		 for(unsigned int j= y; std::min(static_cast<int>(img.getWidth()),(y+1)*y_step); ++j){
 		 		PrimaryRayBundle pr;
 		 		pr.x=i; pr.y=j;
 		 		Ray ray;

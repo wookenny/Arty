@@ -143,7 +143,7 @@ void Scene::loadScene(const std::string &xmlfile){
         pugi::xml_document doc;
         pugi::xml_parse_result result = doc.load_file(xmlfile.c_str());
 	//supress warning:
-	if(not result){}//TODO: give a meaningfull message about hte parsing process!
+	if(not result){}//TODO: give a meaningfull message about hte parsing 
 
         //getting general settings:
         pugi::xml_node child = doc.child("Scene").child("Boundaries");
