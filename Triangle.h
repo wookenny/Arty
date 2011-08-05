@@ -1,5 +1,6 @@
 #pragma once
 #include "Obstacle.h"
+#include <cstdlib>
 
 class Triangle: public Obstacle{
 

@@ -2,7 +2,8 @@
 #include "common.h"
 
 #include <string>
-
+#include <algorithm>
+#include <iostream>
 
 class Color{
 
@@ -57,6 +58,5 @@ public:
 //global operators
 Color operator*(real a, const Color& c);
 
-
 //stream operator
-std::ostream &operator<<(std::ostream &stream, Color c);
+std::ostream &operator<< (std::ostream &stream, const Color& c);

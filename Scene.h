@@ -10,9 +10,13 @@
 #include "Lightsource.h"
 #include "common.h"
 
+
+//container class for parts to render
+
 class Scene{
 
 	private:
+		bool _copy;
 
 		//general settings:
 		Vector3 _eye, _down, _right, _upperLeftCorner;
@@ -20,7 +24,7 @@ class Scene{
 		real _pixelPerUnit;
 		Image _tracedImage;
 		int _maxRayDepth;
-		int _superSampling; //calculate s x s Rays for each pixel on an edge 	
+		int _superSampling; //calculate s x s Rays for each pixel on an edge
 
 		//KD-Tree objects
 		std::vector<Obstacle*> _objects;//pointers because of polymorphism
@@ -30,33 +34,34 @@ class Scene{
 		boost::unordered_map<std::string, Vector3> _vertices;
 		boost::unordered_map<std::string, Material> _materials;
 
-			
-		//ambient lightning	
+
+		//ambient lightning
 		Color _ambient;
 
-		
-		void setLightsources(const std::vector<Lightsource>& l){ _lights = l; }		
+
+		void setLightsources(const std::vector<Lightsource>& l){ _lights = l; }
 		void setObjects(const std::vector<Obstacle*>& o){ _objects =o;}
 
 	public:
-		Scene(){}
+		Scene():_copy(false){}
+		Scene( const Scene &s);
 		~Scene();
-		void loadOFF_File(const std::string &str, real x_min, real x_max, 
+		void loadOFF_File(const std::string &str, real x_min, real x_max,
 				real y_min, real y_max, real z_min, real z_max, std::string material);
 
-		
-		void loadScene(const std::string &xmlfile);	
+
+		void loadScene(const std::string &xmlfile);
 		void loadDefaultScene();
 
 
 		//setter
 		void setEyepoint(const Vector3& e){_eye = e;}
-		void setDown(const Vector3& d){_down = d;}		
+		void setDown(const Vector3& d){_down = d;}
 		void setRight(const Vector3& r){_right = r;}
 		void setUpperLeftCorner(const Vector3& c){_upperLeftCorner = c;}
 		void setWidth(real w){ _width = w; }
 		void setHeight(real h){ _height = h; }
-		void setPixelPerUnit(const real p){ _pixelPerUnit = p;}	
+		void setPixelPerUnit(const real p){ _pixelPerUnit = p;}
 		void setImage(const Image& img){ _tracedImage = img; }
 		void setMaxRayDepth(const int d){ _maxRayDepth = d;}
 

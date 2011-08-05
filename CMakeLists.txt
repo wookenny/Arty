@@ -9,7 +9,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS " -lz -lpng")
 
 
 # collect all sources (copy from 'ls -1 *.h *.cpp')
-SET(ArtySources 
+SET(ArtySources
 Color.cpp
 Color.h
 common.h
@@ -49,6 +49,6 @@ MESSAGE( STATUS "${CMAKE_CXX_FLAGS}" )
 MESSAGE( STATUS "-------------------------------------------------------------------------------" )
 MESSAGE( STATUS )
 
-#define executable 
+#define executable
 ADD_EXECUTABLE(Arty ${ArtySources} )
 

@@ -13,7 +13,24 @@
 #include <iostream>
 #include <fstream>
 
+
+
+
+
+Scene::Scene( const Scene &s):_eye(s._eye), _down(s._down), _right(s._right), 
+				_upperLeftCorner(s._upperLeftCorner), _width(s._width), _height(s._height),
+				_pixelPerUnit(s._pixelPerUnit), _tracedImage(s._tracedImage), 
+				_maxRayDepth(s._maxRayDepth), _superSampling(s._superSampling), 
+				_objects(s._objects), _textures(s._textures), _lights(s._lights), 
+				_vertices(s._vertices), _materials(s._materials), _ambient(s._ambient){
+	_copy = true;
+
+}
+
+
 Scene::~Scene(){
+	if(_copy)//nothing to delete if this is a copy
+		return;
 	//delete all objects since they were loaded dynamically
 	for( std::vector<Obstacle*>::iterator i = _objects.begin(); i != _objects.end(); ++i )
     		delete *i;
@@ -125,7 +142,9 @@ void Scene::loadScene(const std::string &xmlfile){
 	//code_load_file
         pugi::xml_document doc;
         pugi::xml_parse_result result = doc.load_file(xmlfile.c_str());
- 
+	//supress warning:
+	if(not result){}//TODO: give a meaningfull message about hte parsing process!
+
         //getting general settings:
         pugi::xml_node child = doc.child("Scene").child("Boundaries");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){

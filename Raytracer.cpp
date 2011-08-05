@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <omp.h>
 
 #include <fstream>
 #include <boost/lexical_cast.hpp>
@@ -23,12 +22,12 @@ std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays() const{
 		 		Ray ray;
 		 		ray.setRaydepth(_scene.getMaxRayDepth());
 		 		ray.setOrigin(_scene.getEye());
-		 		Vector3 dir =  _scene.getUpperLeftCorner() 
-						+ (_scene.getRight() * (_scene.getWidth()*i/img.getWidth()) ) 
+		 		Vector3 dir =  _scene.getUpperLeftCorner()
+						+ (_scene.getRight() * (_scene.getWidth()*i/img.getWidth()) )
 						+ (_scene.getDown() * (_scene.getHeight()*j/img.getHeight()) )
 						- _scene.getEye();
 				dir.normalize();
-				ray.setDirection( dir );				
+				ray.setDirection( dir );
 		 		pr.r = ray;
 		 		pr.sampling = 1;
 		 		primRays.push_back(pr);
@@ -41,19 +40,19 @@ std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays(int rank,int size) 
 	std::vector<PrimaryRayBundle> primRays;
 	const Image& img = _scene.getImage();
 	int stepsize = img.getWidth()/size+1;
-	for(unsigned int i = rank*stepsize; i< std::min((int)img.getWidth(),(rank+1)*stepsize); ++i)
+	for(int i = rank*stepsize;	i< std::min((int)img.getWidth(),(rank+1)*stepsize);	++i)
 		 	for(unsigned int j= 0; j< img.getHeight(); ++j){
 		 		PrimaryRayBundle pr;
 		 		pr.x=i; pr.y=j;
 		 		Ray ray;
 		 		ray.setRaydepth(_scene.getMaxRayDepth());
 		 		ray.setOrigin(_scene.getEye());
-		 		Vector3 dir = _scene.getUpperLeftCorner() 
-						+ (_scene.getRight() * (_scene.getWidth()*i/img.getWidth()) ) 
+		 		Vector3 dir = _scene.getUpperLeftCorner()
+						+ (_scene.getRight() * (_scene.getWidth()*i/img.getWidth()) )
 						+ (_scene.getDown() * (_scene.getHeight()*j/img.getHeight()) )
 						- _scene.getEye();
 				dir.normalize();
-				ray.setDirection( dir );				
+				ray.setDirection( dir );
 		 		pr.r = ray;
 		 		pr.sampling = 1;
 		 		primRays.push_back(pr);
@@ -67,47 +66,44 @@ std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays(int rank,int size) 
 //replace by recursive ray calculation and color calculation, has to return a color
 Color Raytracer::traceRay(const Ray& ray) const{
 	Color col = Color(0,0,0);
-	
+
 	//intersection Informations
 	IntersectionCompound intersection;
 	intersection.t = -1;
 	intersection.mat = 0;
 
 	//test for nearest intersections
-	for(unsigned int i=0; i< _scene.getNumObjects(); ++i){ 
+	for(unsigned int i=0; i< _scene.getNumObjects(); ++i){
 		IntersectionCompound inter = _scene.getObject(i)->getIntersection(ray);
 		if(inter.t>0 && ( inter.t < intersection.t or intersection.t==-1))
 			intersection = inter;
 	}
-	
+
 	//calculate color and recursive call
 	if( intersection.t > eps and intersection.mat!=0){//something hit?
-		col = localColor(intersection,ray);	
+		col = localColor(intersection,ray);
 
-		if(intersection.mat->getReflection()>eps and ray.getDepth()>0){	
+		if(intersection.mat->getReflection()>eps and ray.getDepth()>0){
 			Ray reflectedRay = Ray::getReflectedRay(ray,intersection.t,intersection.normal);
-			col += intersection.mat->getReflection()*traceRay(reflectedRay);		
+			col += intersection.mat->getReflection()*traceRay(reflectedRay);
 		//TODO: tranparenz erweitern
 		}
 	}
-		
+
 	return col;
 }
 
 
 void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
 
-	unsigned int i;
 
-
+	
 	const Raytracer &rt = *this;
 	TracingFunctor t_func( rt );
-	//#pragma omp parallel for shared(rt) schedule(dynamic) 
-	//#pragma omp parallel for
-	for(i=0; i<rays.size();++i){
+
+	for(uint i=0; i<rays.size();++i)
 		t_func(rays.at(i));
-	}
-	
+
 }
 
 
@@ -124,10 +120,10 @@ Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) co
 		Vector3 lightdir = pos - hitpoint;
 		lightdir.normalize();
 		//TODO get shadow percentage
-		c += _scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getDiffuse()*local_color 
+		c += _scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getDiffuse()*local_color
 				*std::max(real(0),inter.normal.dot(lightdir));
 	}
-	
+
 	//specular term
 	for(unsigned int i=0; i<_scene.getNumLights() ; ++i){
 		const Vector3 &pos = _scene.getLight(i).getPosition();
@@ -143,17 +139,17 @@ Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) co
 		c += _scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getSpecular()
 			* std::pow(std::max(real(0),inter.normal.dot(h)),m.getShininess());
 	}
-	
-	
+
+
 	return c;
-}		
+}
 
 
 std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
-	//find pixel to trace 	
+	//find pixel to trace
 	const Image &img = _scene.getImage();
 	std::vector<std::vector<bool> > edges = img.findEdges();
-	std::vector<PrimaryRayBundle> aliasedRays;	
+	std::vector<PrimaryRayBundle> aliasedRays;
 	for(unsigned int i= 0; i< edges.size(); ++i)
 		 	for(unsigned int j= 0; j< edges[i].size(); ++j)
 		 		if(edges[i][j]){
@@ -161,19 +157,19 @@ std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
 				 		pr.x=i; pr.y=j;
 						if(debug){
 							pr.color = Color(1,0,0);
-							continue;						
-						}	
+							continue;
+						}
 				 		Ray ray;
 				 		ray.setRaydepth(_scene.getMaxRayDepth());
 				 		ray.setOrigin(_scene.getEye());
-				 		Vector3 dir = _scene.getUpperLeftCorner() 
-								+ (_scene.getRight() 
-								* (_scene.getWidth()*i/_scene.getImage().getWidth()) ) 
-								+ (_scene.getDown() 
+				 		Vector3 dir = _scene.getUpperLeftCorner()
+								+ (_scene.getRight()
+								* (_scene.getWidth()*i/_scene.getImage().getWidth()) )
+								+ (_scene.getDown()
 								* (_scene.getHeight()*j/_scene.getImage().getHeight()) )
 								- _scene.getEye();
 						dir.normalize();
-						ray.setDirection( dir );				
+						ray.setDirection( dir );
 				 		pr.r = ray;
 				 		pr.sampling = _scene.getSampling();
 				 		aliasedRays.push_back(pr);
@@ -184,7 +180,7 @@ std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
 
 void Raytracer::trace(){
 	time_t start,stop;
-	
+
 	time(&start);
 	std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
 	traceRays(primRays);
@@ -195,7 +191,7 @@ void Raytracer::trace(){
 		img.at(primRays[i].x,primRays[i].y) = primRays[i].color;
 
 	//remove uogly edges
-	std::vector<PrimaryRayBundle> aliasRays;	
+	std::vector<PrimaryRayBundle> aliasRays;
 	if(_scene.getSampling()>0)
 		aliasRays = generateAliasedRays(_debug);
 
@@ -217,20 +213,18 @@ bool Raytracer::inShadow(const Vector3& coord, const Vector3& light) const{
 	real distance = lightdir.length();
 	lightdir.normalize();
 	Ray ray(coord+eps*lightdir,lightdir);
-	
+
 	for(unsigned int i=0; i<_scene.getNumObjects(); ++i){
 		IntersectionCompound inter;
 		//prevent jumps on uninitialised values
-		inter.t = -1; 
+		inter.t = -1;
 
 		inter = _scene.getObject(i)->getIntersection(ray);
 		if(inter.t > eps )
 			if(inter.t < distance)
 				return true;
-		
+
 	}
 	return false;
-}		
-
-
+}
 

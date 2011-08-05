@@ -1,7 +1,7 @@
 #include "Vector3.h"
 #include <cmath>
 #include <sstream>
-
+#include <cstdlib>
 
 Vector3::Vector3(const std::string &str):_data(0.0,3){
 	//parse x,y,z

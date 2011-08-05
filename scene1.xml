@@ -7,7 +7,7 @@
 		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
 		<Bound Name="Width" value="2." />
 		<Bound Name="Height" value="2." />
-		<Bound Name="PixelPerUnit"  value="400" />
+		<Bound Name="PixelPerUnit"  value="60" />
 		<Bound Name="Supersampling" value="4" />
 	</Boundaries>
 
@@ -18,17 +18,18 @@
 
 	<Materials>
 		<Material Name="mat1" Color="1 0 0" />
-		<Material Name="mat2" Color="1 1 0" Texture="lena.png"/>
+		<Material Name="mat2" Color="1 1 0" Texture="lorem.png"/>
 		<Material Name="mat3" Color="1 1 1" />
-		<Material Name="mat4" Color="0 0 1" Specular="0.2" Shininess="64" Reflection="0.3"/>
-		<Material Name="mat5" Color="0.7 0.8 0.4" Specular="0.5" Shininess="256" Reflection="0.2"/>
+		<Material Name="mat4" Color="1 0.5 0.5" Specular="0.2" Shininess="64" Reflection="0.3"/>
+		<Material Name="mat5" Color="0.1 0.6 0.6" Specular="0.5" Shininess="256" Reflection="0.2"/>
+		<Material Name="mat6" Color="1 1 0" />	
 	</Materials>
 
 	<Geometry>
 		<Implicits>
 			<Object Name="Sphere4" Type="Sphere" Position="-.3 0.5 2.3" Radius="0.1" Material="mat1"/>
-			<Object Name="Sphere5" Type="Sphere" Position=".3 0.3 2" Radius="0.3" Material="mat5"/>
-			<!--<Object Name="DebugSphere" Type="Sphere" Position="0 0 2" Radius="0.5" Material="mat4"/>
+			<!--<Object Name="Sphere5" Type="Sphere" Position=".3 0.3 2" Radius="0.3" Material="mat5"/>
+			<Object Name="DebugSphere" Type="Sphere" Position="0 0 2" Radius="0.5" Material="mat4"/>
 			<Object Name="Sphere1" Type="Sphere" Position=".3 -0.7 2" Radius="0.3" Material="mat4"/>
 			<Object Name="Sphere2" Type="Sphere" Position=".3 0.7 2.8" Radius="0.1" Material="mat4"/>
 			<Object Name="Sphere3" Type="Sphere" Position="-.3 -0.7 1.5" Radius="0.1" Material="mat4"/>
@@ -46,20 +47,20 @@
 			<Point Name="LOV" Position="-1 1 1"/>
 		</Points>
 		<Triangles>
-			<Triangle Name="hinten1" A="LUH" B="ROH" C="RUH" Material="mat3" />
-			<Triangle Name="hinten2" A="LUH" B="LOH" C="ROH" Material="mat3" />
+			<Triangle Name="hinten1" A="LUH" B="ROH" C="RUH" Material="mat2" TextureCoords="1 0 0 1 0 0"/>
+			<Triangle Name="hinten2" A="LUH" B="LOH" C="ROH" Material="mat2" TextureCoords="1 0 1 1 0 1"/>
 
 			<Triangle Name="links1" A="LUV" B="LOH" C="LUH" Material="mat1" />
 			<Triangle Name="links2" A="LUV" B="LOV" C="LOH" Material="mat1" />
 
-			<Triangle Name="rechts1" A="RUV" B="RUH" C="ROH" Material="mat2"  TextureCoords="0 0 1 0 1 1"/>
-			<Triangle Name="rechts2" A="RUV" B="ROH" C="ROV" Material="mat2"  TextureCoords="0 0 1 1 0 1"/>
+			<Triangle Name="rechts1" A="RUV" B="RUH" C="ROH" Material="mat6"/>
+			<Triangle Name="rechts2" A="RUV" B="ROH" C="ROV" Material="mat6"/>
 	
 			<Triangle Name="unten1" A="LUV" B="LUH" C="RUH" Material="mat3" />
 			<Triangle Name="unten2" A="LUV" B="RUH" C="RUV" Material="mat3" />
 		</Triangles>
 		<OFF>
-			<OFF-Mesh Name="teapot.off" Material="mat4" x1 = "-.8" x2 =".3" y1 ="-1" y2 ="0.85" z1 ="2" z2 ="3"/>
+			<OFF-Mesh Name="meshes/bunnysimple.off" Material="mat4" x1 = "-.8" x2 =".8" y1 ="-1" y2 ="1" z1 ="1.5" z2 ="2.5"/>
 		</OFF>
 	</Geometry>
 
