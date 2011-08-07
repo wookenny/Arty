@@ -14,11 +14,10 @@ int main(int args, char** argv){
 	Raytracer rt;
 	if(args==2){
 		rt.loadScene( argv[1] );
-	}else
+	}else{
 		rt.loadDefaultScene();
+	}	
 	rt.trace();
 	rt.saveImage("traced.png");
 
-
 }
-

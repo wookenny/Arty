@@ -36,12 +36,12 @@ std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays() const{
 }
 
 
-std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays(int x, int x_step, int y, int y_step) const{
+std::vector<PrimaryRayBundle> Raytracer::generatePrimaryRays(int x1, int x2, int y1, int y2) const{
 	std::vector<PrimaryRayBundle>  primRays;
 	const Image& img = _scene.getImage();
 
-	for(int i = x;	i< std::min(static_cast<int>(img.getWidth()),(x+1)*x_step);++i)
-		 for(unsigned int j= y; std::min(static_cast<int>(img.getWidth()),(y+1)*y_step); ++j){
+	for(int i = x1;	i< x2;++i)
+		 for(int j= y1; j < y2; ++j){
 		 		PrimaryRayBundle pr;
 		 		pr.x=i; pr.y=j;
 		 		Ray ray;
@@ -95,10 +95,8 @@ Color Raytracer::traceRay(const Ray& ray) const{
 
 
 void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
-
-
 	
-	const Raytracer &rt = *this;
+	Raytracer *rt = this;
 	TracingFunctor t_func( rt );
 
 	for(uint i=0; i<rays.size();++i)
@@ -179,8 +177,7 @@ std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
 
 
 void Raytracer::trace(){
-	std::cout<<"found: "<<num_cores<<" cores"<<std::endl;
-
+	
 	//time stuff
 	typedef std::chrono::high_resolution_clock Clock;
 	typedef std::chrono::duration<double> sec;
@@ -192,11 +189,14 @@ void Raytracer::trace(){
 	//at the end: join
 	std::vector<std::thread> threads; 
 	tilesToTrace_.clear();
-	int x = 0,y = 0, x_step = 10, y_step = 10;
-	while( x < _scene.getWidth()){
-		int x2 = std::min(x+x_step,_scene.getWidth());
-		while( y < _scene.getHeight() ){
-			int y2 = std::min(y+y_step,_scene.getHeight());
+	curr_ = 0;
+	uint x = 0,y = 0, x_step = 100, y_step = 100;//TODO fix stepsize
+
+	while( x <  _scene.getImage().getWidth()){
+		uint x2 = std::min(x+x_step,_scene.getImage().getWidth());
+		y = 0;
+		while( y < _scene.getImage().getHeight() ){
+			uint y2 = std::min(y+y_step,_scene.getImage().getHeight());
 			tilesToTrace_.push_back(std::make_tuple(x,x2,y,y2));
 			y = y2;		
 		}
@@ -204,27 +204,27 @@ void Raytracer::trace(){
 	}
 
 	//create new thread here
-	/*	
 	for(uint i =0; i<num_cores; ++i){
 		threads.push_back(
-			std::thread{CalcFunctorWithPool(pool,data,result)}	
+			std::thread{TracingFunctor(this)}	
 		);
 	}
-	*/
+	
 	for(uint i=0; i<threads.size(); ++i)
 		threads[i].join();
 
-	std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
-	traceRays(primRays);
+	//TODO: delete old call:
+	//std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
+	//traceRays(primRays);
 
 
 	//remove ugly edges
-	std::vector<PrimaryRayBundle> aliasRays;
-	if(_scene.getSampling()>0)
-		aliasRays = generateAliasedRays(_debug);
+	//std::vector<PrimaryRayBundle> aliasRays;
+	//if(_scene.getSampling()>0)
+	//	aliasRays = generateAliasedRays(_debug);
 
-	if(not _debug)
-		traceRays( aliasRays );
+	//if(not _debug)
+	//	traceRays( aliasRays );
 
 	//copy all the color into the image
 	//for(unsigned int i = 0; i<aliasRays.size(); ++i)

@@ -29,7 +29,7 @@ class Raytracer{
 		bool _debug;
 		//methods used by the raytracer
 		std::vector<PrimaryRayBundle> generatePrimaryRays() const;
-		std::vector<PrimaryRayBundle> generatePrimaryRays(int x, int x_stepx, int y, int y_step) const;
+		std::vector<PrimaryRayBundle> generatePrimaryRays(int x1, int x2, int y1, int y2) const;
 		Color traceRay(const Ray&) const;
 		void traceRays(std::vector<PrimaryRayBundle>&);
 		std::vector<PrimaryRayBundle> generateAliasedRays(bool debug = false) const;
@@ -41,6 +41,7 @@ class Raytracer{
 		uint num_cores;
 		std::mutex m_;
 		std::vector<std::tuple<int,int,int,int> > tilesToTrace_;
+		uint curr_;
 
 	public:
 
@@ -57,25 +58,33 @@ class Raytracer{
 
 struct TracingFunctor{
 
-	const Raytracer &_rt;
+	Raytracer *_rt;
 	bool _showEdges;
 	
-	TracingFunctor(const Raytracer& rt,bool edges = false):_rt(rt),_showEdges(edges){
-	
+	TracingFunctor(Raytracer *rt,bool edges = false):_rt(rt),_showEdges(edges){}
+
+	inline void operator()(){
+		std::tuple<int,int,int,int> t;
+		while( true ){
+			{//scope for mutex
+				std::lock_guard<std::mutex> lk(_rt->m_);
+				if( _rt->curr_ >= _rt->tilesToTrace_.size() )
+					break;
+				t = _rt->tilesToTrace_[_rt->curr_]; 
+				_rt->curr_++;
+			}
+			
+			std::vector<PrimaryRayBundle> p = _rt->generatePrimaryRays(std::get<0>(t),std::get<1>(t),
+									      std::get<2>(t),std::get<3>(t));
+			for(PrimaryRayBundle &b : p)
+				operator()(b);
+		}		
+
 	}
 
-	inline void operator()(std::vector<PrimaryRayBundle>::iterator a,
-					  std::vector<PrimaryRayBundle>::iterator b) {
-		std::vector<PrimaryRayBundle>::iterator iter = a;
-		while(iter != b){	
-			operator()(*iter);
-			++iter;		
-		}	
-	}
-	
 
 	inline void operator() ( PrimaryRayBundle &raybundle) {
-		Color &col =  raybundle.color;
+		Color &col =  _rt->_scene.getImage().at(raybundle.x,raybundle.y);// raybundle.color;
 		col = Color(0,0,0);
 		//trace all rays and average the resulting color
 		int s = raybundle.sampling; 
@@ -86,15 +95,15 @@ struct TracingFunctor{
 				//std::cout<< real(n)/s <<std::endl;
 				//std::cout<< real(m)/s <<std::endl;
 
-				real rightShift = _rt._scene.getWidth()*(raybundle.x+( (n%2==0?.5:-.5)*real(n)/s))/_rt._scene.getImage().getWidth();
-				real downShift = _rt._scene.getHeight()*(raybundle.y+( (m%2==0?.5:-.5)*real(m)/s))/_rt._scene.getImage().getHeight();
+				real rightShift = _rt->_scene.getWidth()*(raybundle.x+( (n%2==0?.5:-.5)*real(n)/s))/_rt->_scene.getImage().getWidth();
+				real downShift = _rt->_scene.getHeight()*(raybundle.y+( (m%2==0?.5:-.5)*real(m)/s))/_rt->_scene.getImage().getHeight();
 				Vector3 &dir = ray.Direction();
-				dir = _rt._scene.getUpperLeft() 
-							+ _rt._scene.getRight() * rightShift  
-							+ _rt._scene.getDown() * downShift
-							- _rt._scene.getEye();
+				dir = _rt->_scene.getUpperLeft() 
+							+ _rt->_scene.getRight() * rightShift  
+							+ _rt->_scene.getDown() * downShift
+							- _rt->_scene.getEye();
 				dir.normalize();
-				col += _rt.traceRay(ray);
+				col += _rt->traceRay(ray);
 				}
 				
 		col/=(s*s);
