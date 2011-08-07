@@ -1,12 +1,11 @@
 #include "Raytracer.h"
 
-
-#include <ctime>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <thread>
 #include <fstream>
+#include <chrono>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -179,9 +178,13 @@ std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
 
 
 void Raytracer::trace(){
-	time_t start,stop;
 
-	time(&start);
+	//new time 
+	typedef std::chrono::high_resolution_clock Clock;
+	typedef std::chrono::duration<double> sec;
+	Clock::time_point start, stop;
+
+	start = Clock::now();
 	std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
 	traceRays(primRays);
 
@@ -203,8 +206,8 @@ void Raytracer::trace(){
 		img.at(aliasRays[i].x,aliasRays[i].y) = aliasRays[i].color;
 
 
-	time(&stop);
-	std::cout<<"Runtime: "<<difftime(stop,start)<<" seconds."<<std::endl;
+	stop = Clock::now();
+	std::cout<<"Runtime: "<<sec(stop-start).count()<<" seconds."<<std::endl;
 }
 
 

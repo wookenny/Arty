@@ -2,8 +2,8 @@
 
 #include <vector>
 #include <string>
-#include <boost/unordered_map.hpp>
-
+#include <tuple>
+#include <thread>
 #include "common.h"
 
 #include "Ray.h"
@@ -37,11 +37,15 @@ class Raytracer{
 		//TODO: anteil vom schatten zurückgeben
 		bool inShadow(const Vector3& coord, const Vector3& light) const;		
 
+		//multithreading parts
+		uint num_cores;
+		std::mutex m_;
+		std::vector<std::tuple<int,int,int,int> > tilesToTrace_;
 
 	public:
 
 		//Constructor
-		Raytracer():_debug(false){ /*init();*/ }		
+		Raytracer():_debug(false),num_cores(sysconf( _SC_NPROCESSORS_ONLN )){ /*init();*/ }		
 
 		//important methods
 		void trace();
@@ -53,7 +57,7 @@ class Raytracer{
 
 struct TracingFunctor{
 
-	Raytracer _rt;
+	const Raytracer &_rt;
 	bool _showEdges;
 	
 	TracingFunctor(const Raytracer& rt,bool edges = false):_rt(rt),_showEdges(edges){
