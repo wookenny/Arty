@@ -83,8 +83,8 @@ class Scene{
 		const Vector3 &getRight() const{ return _right;}
 		const Vector3 &getUpperLeft() const{ return _upperLeftCorner;}
 
-		real getWidth() const{ return _width;}
-		real getHeight() const{ return _height;}
+		int getWidth() const{ return _width;}
+		int getHeight() const{ return _height;}
 		real getPixelPerUnit() const{ return _pixelPerUnit; }
 		Image& getImage() {return  _tracedImage;}
 		const Image& getImage() const {return  _tracedImage;}

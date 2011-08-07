@@ -5,6 +5,7 @@
 #include <iostream>
 #include <thread>
 #include <fstream>
+#include <tuple>
 #include <chrono>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -178,22 +179,46 @@ std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
 
 
 void Raytracer::trace(){
+	std::cout<<"found: "<<num_cores<<" cores"<<std::endl;
 
-	//new time 
+	//time stuff
 	typedef std::chrono::high_resolution_clock Clock;
 	typedef std::chrono::duration<double> sec;
 	Clock::time_point start, stop;
 
 	start = Clock::now();
+	//create num core threads
+	//and create enough chunks for them to work on
+	//at the end: join
+	std::vector<std::thread> threads; 
+	tilesToTrace_.clear();
+	int x = 0,y = 0, x_step = 10, y_step = 10;
+	while( x < _scene.getWidth()){
+		int x2 = std::min(x+x_step,_scene.getWidth());
+		while( y < _scene.getHeight() ){
+			int y2 = std::min(y+y_step,_scene.getHeight());
+			tilesToTrace_.push_back(std::make_tuple(x,x2,y,y2));
+			y = y2;		
+		}
+		x = x2;	
+	}
+
+	//create new thread here
+	/*	
+	for(uint i =0; i<num_cores; ++i){
+		threads.push_back(
+			std::thread{CalcFunctorWithPool(pool,data,result)}	
+		);
+	}
+	*/
+	for(uint i=0; i<threads.size(); ++i)
+		threads[i].join();
+
 	std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
 	traceRays(primRays);
 
-	//copy all the color into the image
-	Image &img = _scene.getImage();
-	for(unsigned int i = 0; i<primRays.size(); ++i)
-		img.at(primRays[i].x,primRays[i].y) = primRays[i].color;
 
-	//remove uogly edges
+	//remove ugly edges
 	std::vector<PrimaryRayBundle> aliasRays;
 	if(_scene.getSampling()>0)
 		aliasRays = generateAliasedRays(_debug);
@@ -202,8 +227,8 @@ void Raytracer::trace(){
 		traceRays( aliasRays );
 
 	//copy all the color into the image
-	for(unsigned int i = 0; i<aliasRays.size(); ++i)
-		img.at(aliasRays[i].x,aliasRays[i].y) = aliasRays[i].color;
+	//for(unsigned int i = 0; i<aliasRays.size(); ++i)
+	//	img.at(aliasRays[i].x,aliasRays[i].y) = aliasRays[i].color;
 
 
 	stop = Clock::now();
