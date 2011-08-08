@@ -95,7 +95,7 @@ Color Raytracer::traceRay(const Ray& ray) const{
 
 
 void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
-	
+
 	Raytracer *rt = this;
 	TracingFunctor t_func( rt );
 
@@ -177,7 +177,7 @@ std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
 
 
 void Raytracer::trace(){
-	
+
 	//time stuff
 	typedef std::chrono::high_resolution_clock Clock;
 	typedef std::chrono::duration<double> sec;
@@ -187,10 +187,10 @@ void Raytracer::trace(){
 	//create num core threads
 	//and create enough chunks for them to work on
 	//at the end: join
-	std::vector<std::thread> threads; 
+	std::vector<std::thread> threads;
 	tilesToTrace_.clear();
 	curr_ = 0;
-	uint x = 0,y = 0, x_step = 100, y_step = 100;//TODO fix stepsize
+	uint x = 0,y = 0, x_step = 10, y_step = 10;//TODO fix stepsize
 
 	while( x <  _scene.getImage().getWidth()){
 		uint x2 = std::min(x+x_step,_scene.getImage().getWidth());
@@ -198,18 +198,18 @@ void Raytracer::trace(){
 		while( y < _scene.getImage().getHeight() ){
 			uint y2 = std::min(y+y_step,_scene.getImage().getHeight());
 			tilesToTrace_.push_back(std::make_tuple(x,x2,y,y2));
-			y = y2;		
+			y = y2;
 		}
-		x = x2;	
+		x = x2;
 	}
 
 	//create new thread here
 	for(uint i =0; i<num_cores; ++i){
 		threads.push_back(
-			std::thread{TracingFunctor(this)}	
+			std::thread{TracingFunctor(this)}
 		);
 	}
-	
+
 	for(uint i=0; i<threads.size(); ++i)
 		threads[i].join();
 

@@ -7,22 +7,24 @@
 		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
 		<Bound Name="Width" value="2." />
 		<Bound Name="Height" value="2." />
-		<Bound Name="PixelPerUnit"  value="60" />
+		<Bound Name="PixelPerUnit"  value="120" />
 		<Bound Name="Supersampling" value="4" />
 	</Boundaries>
 
 	<Lights>
 		<Light Name="ambient light" Color="0.5 0.5 0.5" Type="ambient" />
-		<Light Name="Light 1" Color="1 1 1" Position="0 2 1"  Intensity = "4" Type="point" />	
+		<Light Name="Light 1" Color="1 1 1" Position="0 2 1"  Intensity = "4" Type="point" />
 	</Lights>
 
 	<Materials>
 		<Material Name="mat1" Color="1 0 0" />
-		<Material Name="mat2" Color="1 1 0" Texture="lorem.png"/>
+		<Material Name="mat2" Texture="lorem.png"/>
 		<Material Name="mat3" Color="1 1 1" />
 		<Material Name="mat4" Color="1 0.5 0.5" Specular="0.2" Shininess="64" Reflection="0.3"/>
 		<Material Name="mat5" Color="0.1 0.6 0.6" Specular="0.5" Shininess="256" Reflection="0.2"/>
-		<Material Name="mat6" Color="1 1 0" />	
+		<Material Name="mat6" Color="1 1 0" />
+        <Material Name="mat7" ProceduralTexture="chessboard" Params = "1 1 0.7; 0 0 0; 0.2; 0.2"/>
+
 	</Materials>
 
 	<Geometry>
@@ -55,9 +57,9 @@
 
 			<Triangle Name="rechts1" A="RUV" B="RUH" C="ROH" Material="mat6"/>
 			<Triangle Name="rechts2" A="RUV" B="ROH" C="ROV" Material="mat6"/>
-	
-			<Triangle Name="unten1" A="LUV" B="LUH" C="RUH" Material="mat3" />
-			<Triangle Name="unten2" A="LUV" B="RUH" C="RUV" Material="mat3" />
+
+			<Triangle Name="unten1" A="LUV" B="LUH" C="RUH" Material="mat7" />
+			<Triangle Name="unten2" A="LUV" B="RUH" C="RUV" Material="mat7" />
 		</Triangles>
 		<OFF>
 			<OFF-Mesh Name="meshes/bunnysimple.off" Material="mat4" x1 = "-.8" x2 =".8" y1 ="-1" y2 ="1" z1 ="1.5" z2 ="2.5"/>
@@ -65,3 +67,4 @@
 	</Geometry>
 
 </Scene>
+

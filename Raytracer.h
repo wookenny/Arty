@@ -18,7 +18,7 @@ struct PrimaryRayBundle{
 	int x;
 	int y;
 	int sampling;
-	Color color;	
+	Color color;
 };
 
 class Raytracer{
@@ -35,7 +35,7 @@ class Raytracer{
 		std::vector<PrimaryRayBundle> generateAliasedRays(bool debug = false) const;
 		Color localColor(const IntersectionCompound&,const Ray&) const;
 		//TODO: anteil vom schatten zurückgeben
-		bool inShadow(const Vector3& coord, const Vector3& light) const;		
+		bool inShadow(const Vector3& coord, const Vector3& light) const;
 
 		//multithreading parts
 		uint num_cores;
@@ -46,21 +46,21 @@ class Raytracer{
 	public:
 
 		//Constructor
-		Raytracer():_debug(false),num_cores(sysconf( _SC_NPROCESSORS_ONLN )){ /*init();*/ }		
+		Raytracer():_debug(false),num_cores(sysconf( _SC_NPROCESSORS_ONLN )){ /*init();*/ }
 
 		//important methods
 		void trace();
 		void saveImage(const std::string& filename){ _scene.getImage().save(filename); }// method possibly changes the colors//change this
-		
+
 		void loadDefaultScene(){_scene.loadDefaultScene();}
-		void loadScene(const std::string &xmlfile){_scene.loadScene(xmlfile);}		
+		void loadScene(const std::string &xmlfile){_scene.loadScene(xmlfile);}
 };
 
 struct TracingFunctor{
 
 	Raytracer *_rt;
 	bool _showEdges;
-	
+
 	TracingFunctor(Raytracer *rt,bool edges = false):_rt(rt),_showEdges(edges){}
 
 	inline void operator()(){
@@ -70,15 +70,18 @@ struct TracingFunctor{
 				std::lock_guard<std::mutex> lk(_rt->m_);
 				if( _rt->curr_ >= _rt->tilesToTrace_.size() )
 					break;
-				t = _rt->tilesToTrace_[_rt->curr_]; 
+				t = _rt->tilesToTrace_[_rt->curr_];
 				_rt->curr_++;
 			}
-			
+
 			std::vector<PrimaryRayBundle> p = _rt->generatePrimaryRays(std::get<0>(t),std::get<1>(t),
 									      std::get<2>(t),std::get<3>(t));
-			for(PrimaryRayBundle &b : p)
+			//for(PrimaryRayBundle &b : p)
+			//	operator()(b);
+			foreach(PrimaryRayBundle &b, p)
 				operator()(b);
-		}		
+
+		}
 
 	}
 
@@ -87,7 +90,7 @@ struct TracingFunctor{
 		Color &col =  _rt->_scene.getImage().at(raybundle.x,raybundle.y);// raybundle.color;
 		col = Color(0,0,0);
 		//trace all rays and average the resulting color
-		int s = raybundle.sampling; 
+		int s = raybundle.sampling;
 		for(int n=0; n<s; ++n)
 			for(int m=0; m<s; ++m){
 				//calculate right ray;
@@ -98,17 +101,18 @@ struct TracingFunctor{
 				real rightShift = _rt->_scene.getWidth()*(raybundle.x+( (n%2==0?.5:-.5)*real(n)/s))/_rt->_scene.getImage().getWidth();
 				real downShift = _rt->_scene.getHeight()*(raybundle.y+( (m%2==0?.5:-.5)*real(m)/s))/_rt->_scene.getImage().getHeight();
 				Vector3 &dir = ray.Direction();
-				dir = _rt->_scene.getUpperLeft() 
-							+ _rt->_scene.getRight() * rightShift  
+				dir = _rt->_scene.getUpperLeft()
+							+ _rt->_scene.getRight() * rightShift
 							+ _rt->_scene.getDown() * downShift
 							- _rt->_scene.getEye();
 				dir.normalize();
 				col += _rt->traceRay(ray);
 				}
-				
+
 		col/=(s*s);
 		//highlight edges
 		if(s>1&&_showEdges)
 			col = Color(1,0,0);
 	}
 };
+

@@ -13,6 +13,7 @@ SET(ArtySources
 Color.cpp
 Color.h
 common.h
+common.cpp
 Image.cpp
 Image.h
 Texture.h

@@ -17,11 +17,11 @@
 
 
 
-Scene::Scene( const Scene &s):_eye(s._eye), _down(s._down), _right(s._right), 
+Scene::Scene( const Scene &s):_eye(s._eye), _down(s._down), _right(s._right),
 				_upperLeftCorner(s._upperLeftCorner), _width(s._width), _height(s._height),
-				_pixelPerUnit(s._pixelPerUnit), _tracedImage(s._tracedImage), 
-				_maxRayDepth(s._maxRayDepth), _superSampling(s._superSampling), 
-				_objects(s._objects), _textures(s._textures), _lights(s._lights), 
+				_pixelPerUnit(s._pixelPerUnit), _tracedImage(s._tracedImage),
+				_maxRayDepth(s._maxRayDepth), _superSampling(s._superSampling),
+				_objects(s._objects), _textures(s._textures), _lights(s._lights),
 				_vertices(s._vertices), _materials(s._materials), _ambient(s._ambient){
 	_copy = true;
 
@@ -51,31 +51,31 @@ void Scene::loadDefaultScene(){
 		_superSampling = 4;
 		_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
 		_tracedImage.setGamma(2.2);
-		_maxRayDepth = 4;	
+		_maxRayDepth = 4;
 		_ambient = 0.05*Color(1,1,1);
-		
+
 		//KD-Tree objects
 		Material mat1,mat2,mat3,mat4,mat5;
 		Texture *red,*green,*white,*blueish,*chessboard;
-		red = new MonochromaticTexture(1,0,0);  
-		green = new MonochromaticTexture(0,1,0);  
-		white = new MonochromaticTexture(1,1,1); 
-		blueish = new MonochromaticTexture(0.0,0.0,0.3); 
-		chessboard = new ChessboardTexture(); 
+		red = new MonochromaticTexture(1,0,0);
+		green = new MonochromaticTexture(0,1,0);
+		white = new MonochromaticTexture(1,1,1);
+		blueish = new MonochromaticTexture(0.0,0.0,0.3);
+		chessboard = new ChessboardTexture();
 
 		mat1.setTexture(red);
 		mat2.setTexture(green);
-		mat3.setTexture(white);	
+		mat3.setTexture(white);
 		mat4.setTexture(blueish);
 		mat5.setTexture(chessboard);
-		
-		mat4.setSpecular(0.2);	
+
+		mat4.setSpecular(0.2);
 		mat4.setShininess(64);
 		_materials["mat1"] = mat1;_materials["mat2"] = mat2;
 		_materials["mat3"] = mat3;_materials["mat4"] = mat4;
 		_materials["mat5"] = mat5;
-		
-	
+
+
 		_vertices["LUH"] = Vector3(-1,-1,3);
 		_vertices["RUH"] = Vector3(1,-1,3);
 		_vertices["ROH"] = Vector3(1,1,3);
@@ -84,13 +84,13 @@ void Scene::loadDefaultScene(){
 		_vertices["RUV"] = Vector3(1,-1,1);
 		_vertices["ROV"] = Vector3(1,1,1);
 		_vertices["LOV"] = Vector3(-1,1,1);
-		
-		
+
+
 		//hinten
 		Triangle* t = new Triangle(_vertices["LUH"],_vertices["ROH"],_vertices["RUH"]);
 		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
-		
+
 		t = new Triangle(_vertices["LUH"],_vertices["LOH"],_vertices["ROH"]);
 		t->setMaterial(&_materials["mat3"]);
 		_objects.push_back(t);//pointers because of polymorphism
@@ -132,7 +132,7 @@ void Scene::loadDefaultScene(){
 		//s->setMaterial(mat3);
 		//_objects.push_back(s);//pointers because of polymorphism
 		_lights.push_back(Lightsource(light, 0.5, Color(1,1,1)));
-		
+
 
 }
 
@@ -143,7 +143,7 @@ void Scene::loadScene(const std::string &xmlfile){
         pugi::xml_document doc;
         pugi::xml_parse_result result = doc.load_file(xmlfile.c_str());
 	//supress warning:
-	if(not result){}//TODO: give a meaningfull message about hte parsing 
+	if(not result){}//TODO: give a meaningfull message about hte parsing
 
         //getting general settings:
         pugi::xml_node child = doc.child("Scene").child("Boundaries");
@@ -183,25 +183,25 @@ void Scene::loadScene(const std::string &xmlfile){
 			_superSampling = ait->as_int();
 		}
 		//additional settings:
-		_maxRayDepth = 4;	
+		_maxRayDepth = 4;
 		_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
 		_tracedImage.setGamma(2.2);
 	}
-	 
+
 
 	//getting light settings:
         child = doc.child("Scene").child("Lights");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
-		std::string type = it->attribute("Type").value();		
+		std::string type = it->attribute("Type").value();
 		if(type == "ambient"){
 			_ambient = 0.05*Color(it->attribute("Color").value());
 		}else if( type == "point"){
 			Vector3 lightpos(it->attribute("Position").value());
-			_lights.push_back(Lightsource(lightpos, it->attribute("Intensity").as_float(), 
+			_lights.push_back(Lightsource(lightpos, it->attribute("Intensity").as_float(),
 					Color(it->attribute("Color").value())));
 
 		}else{
-			std::cout<<"Warning: light of type "<<type<<" not supported!"<<std::endl;		
+			std::cout<<"Warning: light of type "<<type<<" not supported!"<<std::endl;
 		}
 
 	}
@@ -209,7 +209,7 @@ void Scene::loadScene(const std::string &xmlfile){
 	//getting materials:
         child = doc.child("Scene").child("Materials");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
-		std::string name = it->attribute("Name").value();		
+		std::string name = it->attribute("Name").value();
 		Material tmpmat;
 		if( it->attribute("Color") ){
 			//TODO: get rid of the memory
@@ -225,27 +225,34 @@ void Scene::loadScene(const std::string &xmlfile){
 		if( it->attribute("Texture") ){
 			//TODO get rid of memory
 			Texture *tex = new ImageTexture(it->attribute("Texture").value());
-			tmpmat.setTexture(tex);	
+			tmpmat.setTexture(tex);
+		}
+		if( it->attribute("ProceduralTexture") ){
+			if(it->attribute("ProceduralTexture").value()== std::string("chessboard")){
+				Texture *tex = new ChessboardTexture( it->attribute("Params").value() );
+				tmpmat.setTexture(tex);
+			}
+
 		}
 		_materials[name] = tmpmat;
 
 	}
-	
-	//get implicit objects 
+
+	//get implicit objects
 	child = doc.child("Scene").child("Geometry").child("Implicits");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		std::string type = it->attribute("Type").value();
-		if(type == "Sphere"){	
+		if(type == "Sphere"){
 			Sphere* s = new Sphere( Vector3(it->attribute("Position").value()),
 						it->attribute("Radius").as_float());
 			s->setMaterial(&_materials[it->attribute("Material").value()]);
 			_objects.push_back(s);//pointers because of polymorphism
 		}else{
-			std::cout<<"Warning: implicit object with type "<<type<<" not supported!"<<std::endl;		
+			std::cout<<"Warning: implicit object with type "<<type<<" not supported!"<<std::endl;
 		}
 	}
 
-	//get vertices 
+	//get vertices
 	child = doc.child("Scene").child("Geometry").child("Points");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		std::string name = it->attribute("Name").value();
@@ -264,10 +271,10 @@ void Scene::loadScene(const std::string &xmlfile){
 
 		if( it->attribute("TextureCoords") )
 			t->setTextureCoords(it->attribute("TextureCoords").value());
-		
+
 		_objects.push_back(t);
 	}
-		
+
 	//get off files
 	child = doc.child("Scene").child("Geometry").child("OFF");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
@@ -280,7 +287,7 @@ void Scene::loadScene(const std::string &xmlfile){
 	}
 }
 
-void Scene::loadOFF_File(const std::string &str, real x_min, 
+void Scene::loadOFF_File(const std::string &str, real x_min,
 			real x_max, real y_min, real y_max, real z_min, real z_max, std::string material){
 	//open file
 	std::ifstream file;
@@ -288,15 +295,15 @@ void Scene::loadOFF_File(const std::string &str, real x_min,
 	std::string line;
 
 	//1th line: OFF
-	file >> line;	
+	file >> line;
 
 	//2th line: #vertices #faces #edges
-	file >> line;	
+	file >> line;
 	long numVertices = atol(line.c_str());
-	file >> line;	
+	file >> line;
 	long numFaces = atol(line.c_str());
-	file >> line;	
-	
+	file >> line;
+
 	//all vertices (x y z)
 	real x1,x2,y1,y2,z1,z2; x1=x2=y1=y2=z1=z2=0;
 	for(long i = 0; i<numVertices;++i){
@@ -316,17 +323,17 @@ void Scene::loadOFF_File(const std::string &str, real x_min,
 		}
 		//add new vertex
 		_vertices[ str + boost::lexical_cast<std::string>(i) ] = Vector3(x,y,z);
-			
+
 	}
 
 	//shift all points
 	real scale = (x_max - x_min)/(x2-x1);
-	scale = std::min(scale, (y_max - y_min)/(y2-y1) ); 
-	scale = std::min(scale, (z_max - z_min)/(z2-z1) ); 
-	
+	scale = std::min(scale, (y_max - y_min)/(y2-y1) );
+	scale = std::min(scale, (z_max - z_min)/(z2-z1) );
+
 	real x_shift = x_min - x1*scale;
-	real y_shift = y_min - y1*scale;  
-	real z_shift = z_min - z1*scale;  
+	real y_shift = y_min - y1*scale;
+	real z_shift = z_min - z1*scale;
 
 	for(long i = 0; i<numVertices;++i){
 		//scale point
@@ -337,22 +344,22 @@ void Scene::loadOFF_File(const std::string &str, real x_min,
 		if(0==i){
 			x1 = x2 =  	_vertices[ name ][0];
 			y1 = y2 = 	_vertices[ name ][1];
-			z1 = z2 = 	_vertices[ name ][2];	
+			z1 = z2 = 	_vertices[ name ][2];
 		}else{
 			x1 = std::min(x1,_vertices[ name ][0]); x2 = std::max(x2,_vertices[ name ][0]);
 			y1 = std::min(y1,_vertices[ name ][1]); y2 = std::max(y2,_vertices[ name ][1]);
-			z1 = std::min(z1,_vertices[ name ][2]); z2 = std::max(z2,_vertices[ name ][2]); 			
-		}		
+			z1 = std::min(z1,_vertices[ name ][2]); z2 = std::max(z2,_vertices[ name ][2]);
+		}
 	}
-	
+
 
 	std::vector< boost::tuple<long,long,long> > triangleList;
 	std::vector<Vector3> normals(numVertices, Vector3(0,0,0));
 	for(long i = 0; i<numFaces;++i){
 		int n;
-		file >> line;	
+		file >> line;
 		n = atoi(line.c_str());
-		
+
 		if(n==4){
 			long a,b,c,d;
 			file >> line; a = atol(line.c_str());
@@ -389,8 +396,8 @@ void Scene::loadOFF_File(const std::string &str, real x_min,
 			normals[c] += n;
 
 		}else{
-			std::cout<<"WARNING: "<< n <<" vertices per face not supported!"<<std::endl;	
-			return;	
+			std::cout<<"WARNING: "<< n <<" vertices per face not supported!"<<std::endl;
+			return;
 		}
 	}
 
@@ -404,10 +411,9 @@ void Scene::loadOFF_File(const std::string &str, real x_min,
 						_vertices[str + boost::lexical_cast<std::string>(c)]);
 		t->setMaterial(&_materials[ material ]);
 		t->setNormals( normals[a], normals[b], normals[c] );
-		_objects.push_back(t);	
+		_objects.push_back(t);
 	}
 
 
 }
-
 
