@@ -143,6 +143,39 @@ Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) co
 }
 
 
+std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(int x1, int x2, int y1, int y2,
+						const std::vector<std::vector<bool> > *edges, bool debug) const{
+	//find pixel to trace
+	std::vector<PrimaryRayBundle> aliasedRays;
+	for(int i= x1; i< x2; ++i)
+		 	for(int j= y1; j< y2; ++j)
+		 		if( (*edges)[i][j]){
+				 		PrimaryRayBundle pr;
+				 		pr.x=i; pr.y=j;
+						if(debug){
+							pr.color = Color(1,0,0);
+							continue;
+						}
+				 		Ray ray;
+				 		ray.setRaydepth(_scene.getMaxRayDepth());
+				 		ray.setOrigin(_scene.getEye());
+				 		Vector3 dir = _scene.getUpperLeftCorner()
+								+ (_scene.getRight()
+								* (_scene.getWidth()*i/_scene.getImage().getWidth()) )
+								+ (_scene.getDown()
+								* (_scene.getHeight()*j/_scene.getImage().getHeight()) )
+								- _scene.getEye();
+						dir.normalize();
+						ray.setDirection( dir );
+				 		pr.r = ray;
+				 		pr.sampling = _scene.getSampling();
+				 		aliasedRays.push_back(pr);
+		 			}
+	return aliasedRays;
+}
+
+
+//regiona based version
 std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
 	//find pixel to trace
 	const Image &img = _scene.getImage();
@@ -175,9 +208,9 @@ std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
 	return aliasedRays;
 }
 
-
 void Raytracer::trace(){
 
+	std::cout<<"starting tracing with "<< num_cores <<" threads"<<std::endl;
 	//time stuff
 	typedef std::chrono::high_resolution_clock Clock;
 	typedef std::chrono::duration<double> sec;
@@ -210,29 +243,33 @@ void Raytracer::trace(){
 		);
 	}
 
-	for(uint i=0; i<threads.size(); ++i)
-		threads[i].join();
+	foreach(auto &t, threads)
+		t.join();
 
 	//TODO: delete old call:
 	//std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
 	//traceRays(primRays);
-
-
-	//remove ugly edges
-	//std::vector<PrimaryRayBundle> aliasRays;
-	//if(_scene.getSampling()>0)
-	//	aliasRays = generateAliasedRays(_debug);
-
-	//if(not _debug)
-	//	traceRays( aliasRays );
-
-	//copy all the color into the image
-	//for(unsigned int i = 0; i<aliasRays.size(); ++i)
-	//	img.at(aliasRays[i].x,aliasRays[i].y) = aliasRays[i].color;
-
-
 	stop = Clock::now();
 	std::cout<<"Runtime: "<<sec(stop-start).count()<<" seconds."<<std::endl;
+
+	start = Clock::now();
+	//remove ugly edges
+	if( _scene.getSampling()>0){
+		const std::vector<std::vector<bool> > edges = _scene.getImage().findEdges();
+		curr_ = 0;
+		threads.clear();
+		for(uint i =0; i<num_cores; ++i){
+		threads.push_back(
+				std::thread{TracingFunctor(this,_debug,&edges)}
+			);
+		}
+		foreach(auto &t, threads)
+			t.join();
+		//traceRays( aliasRays );
+	}
+	stop = Clock::now();
+	std::cout<<"Runtime(antialias): "<<sec(stop-start).count()<<" seconds."<<std::endl;
+
 }
 
 

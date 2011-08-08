@@ -7,7 +7,7 @@
 		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
 		<Bound Name="Width" value="2." />
 		<Bound Name="Height" value="2." />
-		<Bound Name="PixelPerUnit"  value="120" />
+		<Bound Name="PixelPerUnit"  value="480" />
 		<Bound Name="Supersampling" value="4" />
 	</Boundaries>
 
@@ -23,7 +23,7 @@
 		<Material Name="mat4" Color="1 0.5 0.5" Specular="0.2" Shininess="64" Reflection="0.3"/>
 		<Material Name="mat5" Color="0.1 0.6 0.6" Specular="0.5" Shininess="256" Reflection="0.2"/>
 		<Material Name="mat6" Color="1 1 0" />
-        <Material Name="mat7" ProceduralTexture="chessboard" Params = "1 1 0.7; 0 0 0; 0.2; 0.2"/>
+        <Material Name="mat7" ProceduralTexture="chessboard" Params = ".9 .9 0.9; 0.2 0.2 0.2; 0.2; 0.2"/>
 
 	</Materials>
 

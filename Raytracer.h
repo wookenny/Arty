@@ -33,6 +33,8 @@ class Raytracer{
 		Color traceRay(const Ray&) const;
 		void traceRays(std::vector<PrimaryRayBundle>&);
 		std::vector<PrimaryRayBundle> generateAliasedRays(bool debug = false) const;
+		std::vector<PrimaryRayBundle> generateAliasedRays(int x1, int x2, int y1, int y2,
+						const std::vector<std::vector<bool> > *edges, bool debug = false) const;
 		Color localColor(const IntersectionCompound&,const Ray&) const;
 		//TODO: anteil vom schatten zurückgeben
 		bool inShadow(const Vector3& coord, const Vector3& light) const;
@@ -59,9 +61,12 @@ class Raytracer{
 struct TracingFunctor{
 
 	Raytracer *_rt;
+	const std::vector<std::vector<bool> > *_edges;
 	bool _showEdges;
 
-	TracingFunctor(Raytracer *rt,bool edges = false):_rt(rt),_showEdges(edges){}
+
+	TracingFunctor(Raytracer *rt,bool show = false,
+			const std::vector<std::vector<bool> > *edges = 0):_rt(rt),_edges(edges),_showEdges(show){}
 
 	inline void operator()(){
 		std::tuple<int,int,int,int> t;
@@ -74,8 +79,12 @@ struct TracingFunctor{
 				_rt->curr_++;
 			}
 
-			std::vector<PrimaryRayBundle> p = _rt->generatePrimaryRays(std::get<0>(t),std::get<1>(t),
-									      std::get<2>(t),std::get<3>(t));
+
+
+			std::vector<PrimaryRayBundle> p = (_edges == 0)?
+							_rt->generatePrimaryRays(std::get<0>(t),std::get<1>(t),std::get<2>(t),std::get<3>(t)):
+							_rt->generateAliasedRays(std::get<0>(t),std::get<1>(t),std::get<2>(t),std::get<3>(t),
+							_edges, _showEdges);
 			//for(PrimaryRayBundle &b : p)
 			//	operator()(b);
 			foreach(PrimaryRayBundle &b, p)
