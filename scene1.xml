@@ -7,7 +7,7 @@
 		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
 		<Bound Name="Width" value="2." />
 		<Bound Name="Height" value="2." />
-		<Bound Name="PixelPerUnit"  value="480" />
+		<Bound Name="PixelPerUnit"  value="120" />
 		<Bound Name="Supersampling" value="4" />
 	</Boundaries>
 

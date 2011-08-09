@@ -1,0 +1,12 @@
+* loock here:
+http://www.codermind.com/articles/Raytracer-in-C++-Part-I-First-rays.html
+for some improvements i.e. convert the image brightness to a nice scale -> lightning
+
+* Speed(KD-tree for triangles)
+
+* transparent matrielas, fresnel...
+
+* diffuse tracing -> in many direction
+
+* import imagestack from 64k playground
+

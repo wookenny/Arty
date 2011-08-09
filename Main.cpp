@@ -12,12 +12,16 @@
 int main(int args, char** argv){
 
 	Raytracer rt;
-	if(args==2){
+	if(args>1){
 		rt.loadScene( argv[1] );
 	}else{
 		rt.loadDefaultScene();
-	}	
-	rt.trace();
+	}
+	if(args>2)
+		rt.trace(atoi(argv[2]));
+	else
+		rt.trace();
 	rt.saveImage("traced.png");
 
 }
+

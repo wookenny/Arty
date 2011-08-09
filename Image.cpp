@@ -22,11 +22,11 @@ Image::Image(const std::string file){
 
 
 	for(unsigned int i=0; i<_data.size();++i){
-		for(unsigned int j=0; j<_data.at(i).size();++j){
+		for(unsigned int j=0; j<_data[i].size();++j){
 			Color c(real(img.read(i+1,j+1,1))/65536.,
 					real(img.read(i+1,j+1,2))/65536.,
 					real(img.read(i+1,j+1,3))/65536. );
-			_data.at(i).at(j) = c;
+			_data[i][j] = c;
 		}
 	}
 }
@@ -34,14 +34,14 @@ Image::Image(const std::string file){
 
 void Image::gammaCorrection(){
 	for(unsigned int i=0; i<_data.size();++i)
-		for(unsigned int j=0; j<_data.at(i).size();++j)
-			_data.at(i).at(j).gammaCorrection(_gamma);
+		for(unsigned int j=0; j<_data[i].size();++j)
+			_data[i][j].gammaCorrection(_gamma);
 }
 
 void Image::exposureCorrection(){
 	for(unsigned int i=0; i<_data.size();++i)
-		for(unsigned int j=0; j<_data.at(i).size();++j)
-			_data.at(i).at(j).exposureCorrection();
+		for(unsigned int j=0; j<_data[i].size();++j)
+			_data[i][j].exposureCorrection();
 }
 
 
@@ -52,8 +52,8 @@ void Image::save(const std::string& filename){
 
 	pngwriter writer(getWidth(), getHeight(), 0.0, filename.c_str());
 	for(unsigned int i=0; i<_data.size();++i)
-		for(unsigned int j=0; j<_data.at(i).size();++j){
-			Color c = _data.at(i).at(j);
+		for(unsigned int j=0; j<_data[i].size();++j){
+			const Color &c = _data[i][j];
 			writer.plot(i+1,getHeight()-j, c.getRed(), c.getGreen(), c.getBlue());
 		}
 	writer.write_png();
@@ -61,49 +61,49 @@ void Image::save(const std::string& filename){
 
 
 std::vector<std::vector<bool> > Image::findEdges() const{
-	std::vector<std::vector<bool> > edges(_data.size(),std::vector<bool>(_data.at(0).size(),false));
+	std::vector<std::vector<bool> > edges(_data.size(),std::vector<bool>(_data[0].size(),false));
 	// apply laplce operator
 	unsigned int n,m;
 	real thresh = 0.05;
-	n = edges.size()-1; m = edges.at(0).size()-1;
+	n = edges.size()-1; m = edges[0].size()-1;
 	for(unsigned int i = 0; i <= n; ++i){
 		for(unsigned int j = 0; j <= m; ++j){
 			if(i==0 && j==0)
-				edges.at(0).at(0) = ( (_data.at(0).at(1)+_data.at(1).at(0)-2*_data.at(0).at(0)).max() > thresh  );
+				edges[0][0] = ( (_data[0][1]+_data[1][0]-2*_data[0][0]).max() > thresh  );
 			else if(i==0 && j==m)
-				edges.at(0).at(m) = ( (_data.at(0).at(m-1)+_data.at(1).at(m)-2*_data.at(0).at(m)).max() > thresh  );
+				edges[0][m] = ( (_data[0][m-1]+_data[1][m]-2*_data[0][m]).max() > thresh  );
 			else if(i==n && j==0)
-				edges.at(n).at(0) = ( (_data.at(n).at(1)+_data.at(n-1).at(0)-2*_data.at(n).at(0)).max() > thresh  );
+				edges[n][0] = ( (_data[n][1]+_data[n-1][0]-2*_data[n][0]).max() > thresh  );
 			else if(i==n && j==m)
-				edges.at(n).at(m) = ( (_data.at(n).at(m-1)+_data.at(n-1).at(m)-2*_data.at(n).at(m)).max() > thresh  );
+				edges[n][m] = ( (_data[n][m-1]+_data[n-1][m]-2*_data[n][m]).max() > thresh  );
 			else if(i==0)
-				edges.at(0).at(j) = ( (_data.at(0).at(j-1)+_data.at(0).at(j+1)-2*_data.at(0).at(j)).max() > thresh  );
+				edges[0][j] = ( (_data[0][j-1]+_data[0][j+1]-2*_data[0][j]).max() > thresh  );
 			else if(j==0)
-				edges.at(i).at(0) = ( (_data.at(i-1).at(0)+_data.at(i+1).at(0)-2*_data.at(i).at(0)).max() > thresh  );
+				edges[i][0] = ( (_data[i-1][0]+_data[i+1][0]-2*_data[i][0]).max() > thresh  );
 			else if(i==n)
-				edges.at(n).at(j) = ( (_data.at(n).at(j-1)+_data.at(n).at(j+1)-2*_data.at(n).at(j)).max() > thresh  );
+				edges[n][j] = ( (_data[n][j-1]+_data[n][j+1]-2*_data[n][j]).max() > thresh  );
 			else if(j==m)
-				edges.at(i).at(m) = ( (_data.at(i-1).at(m)+_data.at(i+1).at(m)-2*_data.at(i).at(m)).max() > thresh  );
+				edges[i][m] = ( (_data[i-1][m]+_data[i+1][m]-2*_data[i][m]).max() > thresh  );
 			else
-				edges.at(i).at(j) = ( (_data.at(i-1).at(j)+_data.at(i+1).at(j)+_data.at(i).at(j-1)+_data.at(i).at(j+1)-4*_data.at(i).at(j)).max() > 2*thresh  );
+				edges[i][j] = ( (_data[i-1][j]+_data[i+1][j]+_data[i][j-1]+_data[i][j+1]-4*_data[i][j]).max() > 2*thresh  );
 
 			//for debugging: set all to 1
-			//edges.at(i).at(j)=true;
+			//edges[i][j]=true;
 		}
 	}
 	//widen selection
-	std::vector<std::vector<bool> > additional(_data.size(),std::vector<bool>(_data.at(0).size(),false));
+	std::vector<std::vector<bool> > additional(_data.size(),std::vector<bool>(_data[0].size(),false));
 	for(unsigned int i = 1; i <= n-1; ++i)
 		for(unsigned int j = 1; j <= m-1; ++j)
-			if( edges.at(i).at(j+1) or edges.at(i).at(j-1) or edges.at(i+1).at(j) or edges.at(i+1).at(j)
-			   or edges.at(i+1).at(j+1) or edges.at(i-1).at(j-1) or edges.at(i-1).at(j+1) or edges.at(i+1).at(j-1))
-				additional.at(i).at(j) = true;
+			if( edges[i][j+1] or edges[i][j-1] or edges[i+1][j] or edges[i+1][j]
+			   or edges[i+1][j+1] or edges[i-1][j-1] or edges[i-1][j+1] or edges[i+1][j-1])
+				additional[i][j] = true;
 
 
 	for(unsigned int i = 1; i <= n-1; ++i)
 		for(unsigned int j = 1; j <= m-1; ++j)
-			if( additional.at(i).at(j) )
-				edges.at(i).at(j) = true;
+			if( additional[i][j] )
+				edges[i][j] = true;
 
 	return edges;
 }

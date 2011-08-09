@@ -51,7 +51,7 @@ class Raytracer{
 		Raytracer():_debug(false),num_cores(sysconf( _SC_NPROCESSORS_ONLN )){ /*init();*/ }
 
 		//important methods
-		void trace();
+		void trace(int t=0);
 		void saveImage(const std::string& filename){ _scene.getImage().save(filename); }// method possibly changes the colors//change this
 
 		void loadDefaultScene(){_scene.loadDefaultScene();}

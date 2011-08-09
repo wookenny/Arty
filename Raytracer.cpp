@@ -100,7 +100,7 @@ void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
 	TracingFunctor t_func( rt );
 
 	for(uint i=0; i<rays.size();++i)
-		t_func(rays.at(i));
+		t_func(rays[i]);
 
 }
 
@@ -208,8 +208,8 @@ std::vector<PrimaryRayBundle> Raytracer::generateAliasedRays(bool debug) const{
 	return aliasedRays;
 }
 
-void Raytracer::trace(){
-
+void Raytracer::trace(int t){
+	if (t>0) num_cores = t;
 	std::cout<<"starting tracing with "<< num_cores <<" threads"<<std::endl;
 	//time stuff
 	typedef std::chrono::high_resolution_clock Clock;
