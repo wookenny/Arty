@@ -143,10 +143,11 @@ void Scene::loadScene(const std::string &xmlfile){
         pugi::xml_document doc;
         pugi::xml_parse_result result = doc.load_file(xmlfile.c_str());
 	//supress warning:
-	if(not result){}//TODO: give a meaningfull message about hte parsing
+	if(not result){ std::cout<<"WARNING: parsing error!"<<std::endl;}
+	//TODO: give a meaningfull message about the parsing
 
-        //getting general settings:
-        pugi::xml_node child = doc.child("Scene").child("Boundaries");
+    //getting general settings:
+   	pugi::xml_node child = doc.child("Scene").child("Boundaries");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		pugi::xml_attribute_iterator ait = it->attributes_begin();
 		std::string name = ait->value();
@@ -184,13 +185,13 @@ void Scene::loadScene(const std::string &xmlfile){
 		}
 		//additional settings:
 		_maxRayDepth = 4;
-		_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
-		_tracedImage.setGamma(2.2);
 	}
+	_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
+	_tracedImage.setGamma(2.2);
 
 
 	//getting light settings:
-        child = doc.child("Scene").child("Lights");
+       child = doc.child("Scene").child("Lights");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		std::string type = it->attribute("Type").value();
 		if(type == "ambient"){
