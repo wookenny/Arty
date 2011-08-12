@@ -18,7 +18,7 @@
 
 	<Materials>
 		<Material Name="mat1" Color="1 0 0" />
-		<Material Name="mat2" Texture="lorem.png"/>
+		<Material Name="mat2" Texture="images/lorem.png"/>
 		<Material Name="mat3" Color="1 1 1" />
 		<Material Name="mat4" Color="1 0.5 0.5" Specular="0.2" Shininess="64" Reflection="0.3"/>
 		<Material Name="mat5" Color="0.1 0.6 0.6" Specular="0.5" Shininess="256" Reflection="0.2"/>

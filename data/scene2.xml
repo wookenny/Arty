@@ -15,8 +15,8 @@
 
 	<Lights>
 		<!--<Light Name="ambient light" Color="0.5 0.5 0.5" Type="ambient" />-->
-		<Light Name="Light0" Color="1, 1, 1" Position="0.0, 240.0, -100.0"  Intensity = "2" Type="point" />
-		<Light Name="Light1" Color="0.6, 0.7, 1.0" Position="640.0, 240.0, -10000.0"  Intensity = "1" Type="point" />
+		<Light Name="Light0" Color="1, 1, 1" Position="0.0, 240.0, -100.0"  Intensity = "6" Type="point" />
+		<Light Name="Light1" Color="0.6, 0.7, 1.0" Position="640.0, 240.0, -10000.0"  Intensity = "3" Type="point" />
 
 	</Lights>
 

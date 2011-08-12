@@ -17,6 +17,7 @@
 
 
 
+
 Scene::Scene( const Scene &s):_eye(s._eye), _down(s._down), _right(s._right),
 				_upperLeftCorner(s._upperLeftCorner), _width(s._width), _height(s._height),
 				_pixelPerUnit(s._pixelPerUnit), _tracedImage(s._tracedImage),
@@ -131,7 +132,7 @@ void Scene::loadDefaultScene(){
 		//s = new Sphere(light,0.1);
 		//s->setMaterial(mat3);
 		//_objects.push_back(s);//pointers because of polymorphism
-		_lights.push_back(Lightsource(light, 3, Color(1,1,1)));
+		_lights.push_back(Lightsource(light, 12, Color(1,1,1)));
 
 
 }
@@ -139,12 +140,20 @@ void Scene::loadDefaultScene(){
 
 void Scene::loadScene(const std::string &xmlfile){
 	std::cout<<"loading scene "<<xmlfile<<std::endl;
-	//code_load_file
+
+		std::string path = "";
+		auto found = xmlfile.rfind("/");
+  		if (found!=std::string::npos)
+			path = xmlfile.substr(0,found+1);
+
+
+		//code_load_file
         pugi::xml_document doc;
-        pugi::xml_parse_result result = doc.load_file(xmlfile.c_str());
+    	pugi::xml_parse_result result = doc.load_file(xmlfile.c_str());
 	//supress warning:
 	if(not result){ std::cout<<"WARNING: parsing error!"<<std::endl;}
 	//TODO: give a meaningfull message about the parsing
+
 
     //getting general settings:
    	pugi::xml_node child = doc.child("Scene").child("Boundaries");
@@ -228,7 +237,7 @@ void Scene::loadScene(const std::string &xmlfile){
 			tmpmat.setReflection(it->attribute("Reflection").as_float());
 		if( it->attribute("Texture") ){
 			//TODO get rid of memory
-			Texture *tex = new ImageTexture(it->attribute("Texture").value());
+			Texture *tex = new ImageTexture(path + it->attribute("Texture").value());
 			tmpmat.setTexture(tex);
 		}
 		if( it->attribute("ProceduralTexture") ){
@@ -283,7 +292,7 @@ void Scene::loadScene(const std::string &xmlfile){
 	child = doc.child("Scene").child("Geometry").child("OFF");
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		std::string name = it->attribute("Name").value();
-		loadOFF_File(name,
+		loadOFF_File(path + name,
 						it->attribute("x1").as_float(),it->attribute("x2").as_float(),
 						it->attribute("y1").as_float(),it->attribute("y2").as_float(),
 						it->attribute("z1").as_float(),it->attribute("z2").as_float(),
