@@ -43,7 +43,7 @@ class Scene{
 		void setObjects(const std::vector<Obstacle*>& o){ _objects =o;}
 
 	public:
-		Scene():_copy(false),_width(2), _height(2),_pixelPerUnit(100){}
+		Scene():_copy(false),_width(2), _height(2),_pixelPerUnit(100),_maxRayDepth(4){}
 		Scene( const Scene &s);
 		~Scene();
 		void loadOFF_File(const std::string &str, real x_min, real x_max,

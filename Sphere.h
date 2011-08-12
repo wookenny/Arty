@@ -14,3 +14,4 @@ class Sphere: public Obstacle{
 		Sphere( const Vector3& c = Vector3(0,0,0), real r = 1.0):_center(c),_radius(r),_radius2(r*r){}
 
 };
+

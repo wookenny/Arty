@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Scene FormatVersion="1">
+	<Boundaries>
+		<Bound Name="Eye" value="0.000023 0.00213 -2.000012" />
+		<Bound Name="Right" value="1 0 0" />
+		<Bound Name="Down" value = "0 -1 0"/>
+		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
+		<Bound Name="Width" value="2." />
+		<Bound Name="Height" value="2." />
+		<Bound Name="PixelPerUnit"  value="600" />
+		<Bound Name="Supersampling" value="4" />
+	</Boundaries>
+
+	<Lights>
+		<Light Name="ambient light" Color="0.5 0.5 0.5" Type="ambient" />
+		<Light Name="Light 1" Color="1 1 1" Position="0 2 1"  Intensity = "4" Type="point" />
+	</Lights>
+
+	<Materials>
+		<Material Name="mat1" Color="1 0 0"/>
+		<Material Name="mat2" Color="1 1 0" />
+		<Material Name="mat3" Color="1 1 1" />
+		<Material Name="mat4" Color="0 0 0.3" Specular="0.2" Shininess="64"/>
+	</Materials>
+
+	<Geometry>
+		<Implicits>
+		</Implicits>
+		<Points>
+			<Point Name="LUH" Position="-1 -1 3"/>
+			<Point Name="RUH" Position="1 -1 3"/>
+			<Point Name="ROH" Position="1 1 3"/>
+			<Point Name="LOH" Position="-1 1 3"/>
+			<Point Name="LUV" Position="-1 -1 1"/>
+			<Point Name="RUV" Position="1 -1 1"/>
+			<Point Name="ROV" Position="1 1 1"/>
+			<Point Name="LOV" Position="-1 1 1"/>
+		</Points>
+		<Triangles>
+			<Triangle Name="hinten1" A="LUH" B="ROH" C="RUH" Material="mat3"/>
+		</Triangles>
+		<OFF>
+		</OFF>
+	</Geometry>
+
+</Scene>
+

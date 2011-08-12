@@ -52,7 +52,7 @@ void Scene::loadDefaultScene(){
 		_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
 		_tracedImage.setGamma(2.2);
 		_maxRayDepth = 4;
-		_ambient = 0.05*Color(1,1,1);
+		_ambient = 0.5*Color(1,1,1);
 
 		//KD-Tree objects
 		Material mat1,mat2,mat3,mat4,mat5;
@@ -131,7 +131,7 @@ void Scene::loadDefaultScene(){
 		//s = new Sphere(light,0.1);
 		//s->setMaterial(mat3);
 		//_objects.push_back(s);//pointers because of polymorphism
-		_lights.push_back(Lightsource(light, 0.5, Color(1,1,1)));
+		_lights.push_back(Lightsource(light, 3, Color(1,1,1)));
 
 
 }
@@ -148,6 +148,8 @@ void Scene::loadScene(const std::string &xmlfile){
 
     //getting general settings:
    	pugi::xml_node child = doc.child("Scene").child("Boundaries");
+   	//additional settings:
+	_maxRayDepth = 4;
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		pugi::xml_attribute_iterator ait = it->attributes_begin();
 		std::string name = ait->value();
@@ -183,8 +185,9 @@ void Scene::loadScene(const std::string &xmlfile){
 			++ait;
 			_superSampling = ait->as_int();
 		}
-		//additional settings:
-		_maxRayDepth = 4;
+		else if( name == std::string("MaxRayDepth") )
+			++ait;
+			_maxRayDepth = ait->as_int();
 	}
 	_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
 	_tracedImage.setGamma(2.2);

@@ -14,6 +14,7 @@ private:
 	static real _gamma;
 
 	void gammaCorrection();
+	real findExposureCoefficient() const;
 	void exposureCorrection();
 
 

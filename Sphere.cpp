@@ -11,7 +11,7 @@ IntersectionCompound Sphere::getIntersection(const Ray& ray) const{
 	real B = dst.dot(ray.getDirection());//assume direction is a unit vector
 	real C = dst.dot(dst) - _radius2;
 	real D = B*B - C;
-	
+
 	if( D > 0){ //ray hits sphere?
 		real param = -B - sqrt(D);
 		c.t = param;
@@ -25,3 +25,4 @@ IntersectionCompound Sphere::getIntersection(const Ray& ray) const{
 
 	return c;
 }
+

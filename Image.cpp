@@ -38,16 +38,74 @@ void Image::gammaCorrection(){
 			_data[i][j].gammaCorrection(_gamma);
 }
 
+real Image::findExposureCoefficient() const{
+//similiar to the code shown in a web tutorial(without further explanations)
+/*float AutoExposure(scene & myScene)
+{
+    #define ACCUMULATION_SIZE 16
+    float exposure = -1.0f;
+    float accumulationFactor = float(max(myScene.sizex, myScene.sizey));
+
+    accumulationFactor = accumulationFactor / ACCUMULATION_SIZE;
+    color mediumPoint = 0.0f;
+    const float mediumPointWeight = 1.0f / (ACCUMULATION_SIZE*ACCUMULATION_SIZE);
+    for (int y = 0; y < ACCUMULATION_SIZE; ++y) {
+        for (int x = 0 ; x < ACCUMULATION_SIZE; ++x) {
+            ray viewRay = { {float(x) * accufacteur,
+                             float(y) * accufacteur, -1000.0f},
+                            { 0.0f, 0.0f, 1.0f}};
+            color currentColor = addRay (viewRay, myScene);
+            float luminance = 0.2126f * currentColor.red
+                            + 0.715160f * currentColor.green
+                            + 0.072169f * currentColor.blue
+            mediumPoint += mediumPointWeight * (luminance * luminance);
+        }
+    }
+
+    float mediumLuminance = sqrtf(mediumPoint);
+    if (mediumLuminance > 0.001f)
+    {
+        // put the medium luminance to an intermediate gray value
+        exposure = logf(0.6f) / mediumLuminance;
+    }
+
+    return exposure;
+*/
+	real exposure = -1;
+	real mediumPoint = 0.0f;
+	for(unsigned int i=0; i<_data.size();++i)
+		for(unsigned int j=0; j<_data[i].size();++j){
+				mediumPoint += 0.2126   + _data[i][j].getRed();
+				mediumPoint += 0.715160 + _data[i][j].getGreen();
+				mediumPoint += 0.072169 + _data[i][j].getBlue();
+		}
+	mediumPoint /= getWidth()*getHeight();
+
+	real mediumLuminance = sqrt(mediumPoint);
+	if (mediumLuminance > eps)
+    {
+        // put the medium luminance to an intermediate gray value
+        exposure = log(0.6f) / mediumLuminance;
+    }
+    return exposure;
+}
+
 void Image::exposureCorrection(){
+	//get the exposure correction coefficent
+	//real exposure = -1;
+	real exposure = findExposureCoefficient();
+
+	//correct every single color
 	for(unsigned int i=0; i<_data.size();++i)
 		for(unsigned int j=0; j<_data[i].size();++j)
-			_data[i][j].exposureCorrection();
+			_data[i][j].exposureCorrection(exposure);
 }
 
 
 void Image::save(const std::string& filename){
 	/** shift colors **/
 	exposureCorrection();  //not quite good, somethiong has to be done
+	//should be an auto correction t yield nicely exposed images!
 	gammaCorrection();
 
 	pngwriter writer(getWidth(), getHeight(), 0.0, filename.c_str());
