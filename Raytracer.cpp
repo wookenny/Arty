@@ -250,7 +250,8 @@ void Raytracer::trace(int t){
 	//std::vector<PrimaryRayBundle> primRays = generatePrimaryRays();//generate rays
 	//traceRays(primRays);
 	stop = Clock::now();
-	std::cout<<"Runtime: "<<sec(stop-start).count()<<" seconds."<<std::endl;
+	auto time1 = sec(stop-start).count();
+	std::cout<<"Runtime: "<<time1<<" seconds"<<std::endl;
 
 	start = Clock::now();
 	//remove ugly edges
@@ -268,7 +269,9 @@ void Raytracer::trace(int t){
 		//traceRays( aliasRays );
 	}
 	stop = Clock::now();
-	std::cout<<"Runtime(antialias): "<<sec(stop-start).count()<<" seconds."<<std::endl;
+	auto time2 = sec(stop-start).count();
+	std::cout<<"Runtime(antialias): "<<time2<<" seconds"<<std::endl;
+	std::cout<<"Total running time: "<<time1+time2<<" seconds"<<std::endl;
 
 }
 
