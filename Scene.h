@@ -37,6 +37,7 @@ class Scene{
 
 		//ambient lightning
 		Color _ambient;
+		real _ambientIntensity;
 
 
 		void setLightsources(const std::vector<Lightsource>& l){ _lights = l; }
@@ -75,6 +76,7 @@ class Scene{
 		unsigned int getNumLights() const{ return _lights.size(); }
 		const Lightsource & getLight(unsigned int i) const{ return _lights[i]; }
 		const Color& getAmbient() const{ return _ambient;}
+		const real getAmbientIntensity() const{ return _ambientIntensity;}
 		const Vector3 &getUpperLeftCorner() const{ return _upperLeftCorner;}
 
 

@@ -23,7 +23,8 @@ Scene::Scene( const Scene &s):_eye(s._eye), _down(s._down), _right(s._right),
 				_pixelPerUnit(s._pixelPerUnit), _tracedImage(s._tracedImage),
 				_maxRayDepth(s._maxRayDepth), _superSampling(s._superSampling),
 				_objects(s._objects), _textures(s._textures), _lights(s._lights),
-				_vertices(s._vertices), _materials(s._materials), _ambient(s._ambient){
+				_vertices(s._vertices), _materials(s._materials), _ambient(s._ambient)
+				,_ambientIntensity(s._ambientIntensity){
 	_copy = true;
 
 }
@@ -53,7 +54,8 @@ void Scene::loadDefaultScene(){
 		_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
 		_tracedImage.setGamma(2.2);
 		_maxRayDepth = 4;
-		_ambient = 0.1*Color(1,1,1);
+		_ambient = Color(1,1,1);
+		_ambientIntensity = 0.1;
 
 		//KD-Tree objects
 		Material mat1,mat2,mat3,mat4,mat5;
@@ -216,7 +218,9 @@ void Scene::loadScene(const std::string &xmlfile){
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		std::string type = it->attribute("Type").value();
 		if(type == "ambient"){
-			_ambient = 0.05*Color(it->attribute("Color").value());
+			_ambient = Color(it->attribute("Color").value());
+			_ambientIntensity = it->attribute("Intensity").as_float();
+			_ambientIntensity = _ambientIntensity>eps ? _ambientIntensity : 0.1;
 		}else if( type == "point"){
 			Vector3 lightpos(it->attribute("Position").value());
 			_lights.push_back(Lightsource(lightpos, it->attribute("Intensity").as_float(),

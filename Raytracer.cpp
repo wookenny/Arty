@@ -111,7 +111,7 @@ Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) co
 	Material &m = *inter.mat;
 	Vector3 hitpoint = ray.getOrigin()+inter.t * ray.getDirection();
 	Color local_color = m.getColor(inter);
-	Color c =  _scene.getAmbient()*local_color *m.getAmbient(); //ambient term
+	Color c =  _scene.getAmbientIntensity()*_scene.getAmbient()*local_color *m.getAmbient(); //ambient term
 	//diffuse term
 	for(unsigned int i=0; i<_scene.getNumLights() ; ++i){
 		const Vector3 &pos = _scene.getLight(i).getPosition();
