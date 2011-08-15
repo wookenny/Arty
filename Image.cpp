@@ -92,8 +92,8 @@ real Image::findExposureCoefficient() const{
 
 void Image::exposureCorrection(){
 	//get the exposure correction coefficent
-	//real exposure = -1;
-	real exposure = findExposureCoefficient();
+	real exposure = -1;
+	//real exposure = findExposureCoefficient();
 
 	//correct every single color
 	for(unsigned int i=0; i<_data.size();++i)
