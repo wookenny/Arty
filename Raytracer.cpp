@@ -106,6 +106,8 @@ void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
 
 
 Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) const{//TODO: init scene here
+
+	int shadow_sampling = 7;//TODO: better position to set up light sampling param
 	Material &m = *inter.mat;
 	Vector3 hitpoint = ray.getOrigin()+inter.t * ray.getDirection();
 	Color local_color = m.getColor(inter);
@@ -113,28 +115,29 @@ Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) co
 	//diffuse term
 	for(unsigned int i=0; i<_scene.getNumLights() ; ++i){
 		const Vector3 &pos = _scene.getLight(i).getPosition();
-		if( inShadow(hitpoint,pos) )
+		real shadow = inShadow(hitpoint,_scene.getLight(i),shadow_sampling);
+		if(shadow > 1-eps)
 			continue;
 		Vector3 lightdir = pos - hitpoint;
 		lightdir.normalize();
 		//TODO get shadow percentage
-		c += _scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getDiffuse()*local_color
+		c += (1-shadow)*_scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getDiffuse()*local_color
 				*std::max(real(0),inter.normal.dot(lightdir));
 	}
 
 	//specular term
 	for(unsigned int i=0; i<_scene.getNumLights() ; ++i){
 		const Vector3 &pos = _scene.getLight(i).getPosition();
-		if( inShadow(hitpoint,pos) )
-			continue;
+		real shadow = inShadow(hitpoint,pos,shadow_sampling);
+
 		Vector3 lightdir = pos - hitpoint;
 		lightdir.normalize();
 		Vector3 toEye = _scene.getEye() - hitpoint;
 		toEye.normalize();
 		Vector3 h  = lightdir + toEye;
 		h.normalize();
-		//TODO get shadow percentage and nearest lightpoint
-		c += _scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getSpecular()
+
+		c += (1-shadow)*_scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getSpecular()
 			* std::pow(std::max(real(0),inter.normal.dot(h)),m.getShininess());
 	}
 
@@ -276,23 +279,31 @@ void Raytracer::trace(int t){
 }
 
 
-bool Raytracer::inShadow(const Vector3& coord, const Vector3& light) const{
-	Vector3 lightdir = light - coord;
-	real distance = lightdir.length();
-	lightdir.normalize();
-	Ray ray(coord+eps*lightdir,lightdir);
+real Raytracer::inShadow(const Vector3& coord, const Lightsource &light, int num_samples) const{
+	real shadow_hits = 0;
 
-	for(unsigned int i=0; i<_scene.getNumObjects(); ++i){
-		IntersectionCompound inter;
-		//prevent jumps on uninitialised values
-		inter.t = -1;
+	//Vector3 lightdir = light - coord;
+	std::vector<Vector3> lightdirs;
+	light.getDirectionsToLight( coord, num_samples, lightdirs);
+	foreach(Vector3& lightdir, lightdirs){
+		real distance = lightdir.length();
+		lightdir.normalize();
+		Ray ray(coord+eps*lightdir,lightdir);
 
-		inter = _scene.getObject(i)->getIntersection(ray);
-		if(inter.t > eps )
-			if(inter.t < distance)
-				return true;
+		//TODO: do something better here
+		for(unsigned int i=0; i<_scene.getNumObjects(); ++i){
+			IntersectionCompound inter;
+			//prevent jumps on uninitialised values
+			inter.t = -1;
 
+			inter = _scene.getObject(i)->getIntersection(ray);
+			if(inter.t > eps  and inter.t < distance){
+					shadow_hits+=1;
+					break;	//no need to find out how much objects block the view
+				}
+		}
 	}
-	return false;
+	//1 => totally in shadow, 0 => no shadow at all
+	return shadow_hits/lightdirs.size();
 }
 

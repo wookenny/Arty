@@ -53,7 +53,7 @@ void Scene::loadDefaultScene(){
 		_tracedImage = Image(_width*_pixelPerUnit, _height*_pixelPerUnit);
 		_tracedImage.setGamma(2.2);
 		_maxRayDepth = 4;
-		_ambient = 0.5*Color(1,1,1);
+		_ambient = 0.1*Color(1,1,1);
 
 		//KD-Tree objects
 		Material mat1,mat2,mat3,mat4,mat5;
@@ -61,7 +61,7 @@ void Scene::loadDefaultScene(){
 		red = new MonochromaticTexture(1,0,0);
 		green = new MonochromaticTexture(0,1,0);
 		white = new MonochromaticTexture(1,1,1);
-		blueish = new MonochromaticTexture(0.0,0.0,0.3);
+		blueish = new MonochromaticTexture(0.0,0.0,0.8);
 		chessboard = new ChessboardTexture();
 
 		mat1.setTexture(red);
@@ -130,9 +130,18 @@ void Scene::loadDefaultScene(){
 
 		Vector3 light(0.,1,2);
 		//s = new Sphere(light,0.1);
-		//s->setMaterial(mat3);
+		//s->setMaterial(&_materials["mat3"]);
 		//_objects.push_back(s);//pointers because of polymorphism
-		_lights.push_back(Lightsource(light, 12, Color(1,1,1)));
+
+		//configure square shaped light
+		Lightsource l = Lightsource(light, 3, Color(1,1,1));
+		l.setType(Lightsource::Type::Square);
+		//l.setType(Lightsource::Type::Point);
+		l.setSize(0.5);
+		l.setDirection1(Vector3(1,0,0));
+		l.setDirection2(Vector3(0,0,1));
+		_lights.push_back(l);
+
 
 
 }

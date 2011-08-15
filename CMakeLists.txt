@@ -21,6 +21,7 @@ MonochromaticTexture.h
 ChessboardTexture.h
 ImageTexture.h
 Lightsource.h
+Lightsource.cpp
 Main.cpp
 Material.h
 Obstacle.h

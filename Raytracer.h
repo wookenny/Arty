@@ -36,8 +36,7 @@ class Raytracer{
 		std::vector<PrimaryRayBundle> generateAliasedRays(int x1, int x2, int y1, int y2,
 						const std::vector<std::vector<bool> > *edges, bool debug = false) const;
 		Color localColor(const IntersectionCompound&,const Ray&) const;
-		//TODO: anteil vom schatten zurückgeben
-		bool inShadow(const Vector3& coord, const Vector3& light) const;
+		real inShadow(const Vector3& coord, const Lightsource &light,int num_samples = 1) const;
 
 		//multithreading parts
 		uint num_cores;
