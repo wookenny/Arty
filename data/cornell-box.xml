@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<Scene FormatVersion="1">
+	<Boundaries>
+		<Bound Name="Eye" value="0.000023 0.00213 -2.000012" />
+		<Bound Name="Right" value="1 0 0" />
+		<Bound Name="Down" value = "0 -1 0"/>
+		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
+		<Bound Name="Width" value="2." />
+		<Bound Name="Height" value="2." />
+		<Bound Name="PixelPerUnit"  value="120" />
+		<Bound Name="Supersampling" value="4" />
+	</Boundaries>
+
+	<Lights>
+		<Light Name="ambient light" Color="1 1 1" Intensity = "0.1" Type="ambient" />
+		<Light Name="Light 1" Color="1 1 1" Position="0 1 2"  Intensity = "1.5" Type="point" />
+	</Lights>
+
+	<Materials>
+		<Material Name="red" Color="1 0 0" />
+		<Material Name="green" Color="0 1 0" />
+	    <Material Name="white" Color="1 0.9 0.7" />
+		<Material Name="mat4" Color="1 0.5 0.5" Specular="0.2" Shininess="64" Reflection="0.3"/>
+		<Material Name="mat5" Color="0.1 0.6 0.6" Specular="0.5" Shininess="256" Reflection="0.2"/>
+
+
+	</Materials>
+
+	<Geometry>
+	    <Implicits>
+			<!--Object Name="LightSphere" Type="Sphere" Position="0 0 2" Radius="0.1" Material="white"/-->
+		</Implicits>
+
+		<Points>
+			<Point Name="LUH" Position="-1 -1 3"/>
+			<Point Name="RUH" Position="1 -1 3"/>
+			<Point Name="ROH" Position="1 1 3"/>
+			<Point Name="LOH" Position="-1 1 3"/>
+			<Point Name="LUV" Position="-1 -1 1"/>
+			<Point Name="RUV" Position="1 -1 1"/>
+			<Point Name="ROV" Position="1 1 1"/>
+			<Point Name="LOV" Position="-1 1 1"/>
+		</Points>
+		<Triangles>
+			<Triangle Name="hinten1" A="LUH" B="ROH" C="RUH" Material="white" TextureCoords="1 0 0 1 0 0"/>
+			<Triangle Name="hinten2" A="LUH" B="LOH" C="ROH" Material="white" TextureCoords="1 0 1 1 0 1"/>
+
+			<Triangle Name="links1" A="LUV" B="LOH" C="LUH" Material="green" />
+			<Triangle Name="links2" A="LUV" B="LOV" C="LOH" Material="green" />
+
+			<Triangle Name="rechts1" A="RUV" B="RUH" C="ROH" Material="red"/>
+			<Triangle Name="rechts2" A="RUV" B="ROH" C="ROV" Material="red"/>
+
+			<Triangle Name="unten1" A="LUV" B="LUH" C="RUH" Material="white" />
+			<Triangle Name="unten2" A="LUV" B="RUH" C="RUV" Material="white" />
+		</Triangles>
+	</Geometry>
+
+</Scene>
+
