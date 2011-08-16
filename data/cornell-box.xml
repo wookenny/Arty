@@ -13,7 +13,7 @@
 
 	<Lights>
 		<Light Name="ambient light" Color="1 1 1" Intensity = "0.1" Type="ambient" />
-		<Light Name="Light 1" Color="1 1 1" Position="0 1 2"  Intensity = "1.5" Type="point" />
+		<Light Name="Light 1" Color="1 1 1" Position="0 0.80 2"  Intensity = "1.5" Type="point" />
 	</Lights>
 
 	<Materials>
@@ -40,6 +40,12 @@
 			<Point Name="RUV" Position="1 -1 1"/>
 			<Point Name="ROV" Position="1 1 1"/>
 			<Point Name="LOV" Position="-1 1 1"/>
+
+		    <Point Name="mLOV" Position="-0.2 1 1.75"/>
+			<Point Name="mLOH" Position="-0.2 1 2.25"/>
+			<Point Name="mROV" Position= "0.2 1 1.75"/>
+			<Point Name="mROH" Position= "0.2 1 2.25"/>
+
 		</Points>
 		<Triangles>
 			<Triangle Name="hinten1" A="LUH" B="ROH" C="RUH" Material="white" TextureCoords="1 0 0 1 0 0"/>
@@ -53,6 +59,18 @@
 
 			<Triangle Name="unten1" A="LUV" B="LUH" C="RUH" Material="white" />
 			<Triangle Name="unten2" A="LUV" B="RUH" C="RUV" Material="white" />
+
+            <!-- spot for the square light ast ehe ceiling
+			<Triangle Name="unten1" A="mLOV" B="mROH" C="mLOH" Material="white" />
+			<Triangle Name="unten1" A="mROH" B="mLOV" C="mROV" Material="white" /-->
+			<Triangle Name="decke1" A="LOV" B="mLOV" C="mLOH" Material="white" />
+			<Triangle Name="decke2" A="LOV" B="mLOH" C="LOH" Material="white" />
+			<Triangle Name="decke3" A="LOV" B="ROV" C="mLOV" Material="white" />
+			<Triangle Name="decke4" A="mLOV" B="ROV" C="mROV" Material="white" />
+			<Triangle Name="decke5" A="mROV" B="ROV" C="mROH" Material="white" />
+			<Triangle Name="decke6" A="ROV" B="ROH" C="mROH" Material="white" />
+			<Triangle Name="decke7" A="mLOH" B="ROH" C="LOH" Material="white" />
+			<Triangle Name="decke8" A="mLOH" B="mROH" C="ROH" Material="white" />
 		</Triangles>
 	</Geometry>
 
