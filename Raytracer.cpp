@@ -107,38 +107,53 @@ void Raytracer::traceRays(std::vector<PrimaryRayBundle>& rays){
 
 Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) const{//TODO: init scene here
 
-	int shadow_sampling = 7;//TODO: better position to set up light sampling param
+
 	Material &m = *inter.mat;
 	Vector3 hitpoint = ray.getOrigin()+inter.t * ray.getDirection();
+
+	//get all shadow percentages ONCE:
+	std::vector<real> shadows;
+	int shadow_sampling = 7;//TODO: better position to set up light sampling param
+	for(unsigned int i=0; i<_scene.getNumLights() ; ++i)
+		shadows.push_back(inShadow(hitpoint,_scene.getLight(i),shadow_sampling));
+
+
+
+	//ambient term
 	Color local_color = m.getColor(inter);
-	Color c =  _scene.getAmbientIntensity()*_scene.getAmbient()*local_color *m.getAmbient(); //ambient term
+	Color c =  _scene.getAmbientIntensity()*_scene.getAmbient()*local_color *m.getAmbient();
+
+
 	//diffuse term
 	for(unsigned int i=0; i<_scene.getNumLights() ; ++i){
 		const Vector3 &pos = _scene.getLight(i).getPosition();
-		real shadow = inShadow(hitpoint,_scene.getLight(i),shadow_sampling);
-		if(shadow > 1-eps)
+		if(shadows[i] > 1-eps)
 			continue;
 		Vector3 lightdir = pos - hitpoint;
 		lightdir.normalize();
 		//TODO get shadow percentage
-		c += (1-shadow)*_scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getDiffuse()*local_color
+		c += (1-shadows[i])*_scene.getLight(i).getIntensity()*
+			_scene.getLight(i).getColor()*m.getDiffuse()*local_color
 				*std::max(real(0),inter.normal.dot(lightdir));
 	}
 
 	//specular term
 	for(unsigned int i=0; i<_scene.getNumLights() ; ++i){
-		const Vector3 &pos = _scene.getLight(i).getPosition();
-		real shadow = inShadow(hitpoint,pos,shadow_sampling);
 
-		Vector3 lightdir = pos - hitpoint;
-		lightdir.normalize();
-		Vector3 toEye = _scene.getEye() - hitpoint;
-		toEye.normalize();
-		Vector3 h  = lightdir + toEye;
-		h.normalize();
+		std::vector<Vector3> lightdirs;
+		_scene.getLight(i).getDirectionsToLight( hitpoint, shadow_sampling, lightdirs);
+		real max_spec = 0;
+		foreach(Vector3 &lightdir, lightdirs){
+			lightdir.normalize();
+			Vector3 toEye = _scene.getEye() - hitpoint;
+			toEye.normalize();
+			Vector3 h  = lightdir + toEye;
+			h.normalize();
+			max_spec = std::max(max_spec,inter.normal.dot(h));
+		}
 
-		c += (1-shadow)*_scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getSpecular()
-			* std::pow(std::max(real(0),inter.normal.dot(h)),m.getShininess());
+		c += (1-shadows[i])*_scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getSpecular()
+			* std::pow(max_spec,m.getShininess());
 	}
 
 

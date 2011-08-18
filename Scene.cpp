@@ -72,8 +72,9 @@ void Scene::loadDefaultScene(){
 		mat4.setTexture(blueish);
 		mat5.setTexture(chessboard);
 
-		mat4.setSpecular(0.2);
-		mat4.setShininess(64);
+		mat4.setSpecular(0.1);
+		mat4.setShininess(32);
+		mat4.setReflection(0.1);
 		_materials["mat1"] = mat1;_materials["mat2"] = mat2;
 		_materials["mat3"] = mat3;_materials["mat4"] = mat4;
 		_materials["mat5"] = mat5;
