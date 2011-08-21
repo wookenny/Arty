@@ -7,19 +7,22 @@
 		<Bound Name="UpperLeftCorner" value="-1 1 1"/>
 		<Bound Name="Width" value="2." />
 		<Bound Name="Height" value="2." />
-		<Bound Name="PixelPerUnit"  value="120" />
+		<Bound Name="PixelPerUnit"  value="400" />
 		<Bound Name="Supersampling" value="4" />
 	</Boundaries>
 
 	<Lights>
 		<Light Name="ambient light" Color="1 1 1" Intensity = "0.1" Type="ambient" />
-		<Light Name="Light 1" Color="1 1 1" Position="0 0.80 2"  Intensity = "1.5" Type="point" />
+		<!--Light Name="Light 1" Color="1 1 1" Position="0 0.80 2"  Intensity = "1.5" Type="point" /-->
+		<Light Name="Light 1" Color="1 1 1" Position="0 0.80 2"  Intensity = "1.5"
+		        Type="square" Size="0.2" Dir1="1 0 0" Dir2="0 0 1" />
+	    <!--Light Name="Light 2" Color="1 1 1" Position="0.1 -0.80 2.1"  Intensity = "1.5" Type="point" /-->
 	</Lights>
 
 	<Materials>
-		<Material Name="red" Color="1 0 0" />
-		<Material Name="green" Color="0 1 0" />
-	    <Material Name="white" Color="1 0.9 0.7" />
+		<Material Name="red" Color="1 0 0" Reflection="0.05"/>
+		<Material Name="green" Color="0 1 0" Reflection="0.05"/>
+	    <Material Name="white" Color="1 0.9 0.7" Reflection="0.05"/>
 		<Material Name="mat4" Color="1 0.5 0.5" Specular="0.2" Shininess="64" Reflection="0.3"/>
 		<Material Name="mat5" Color="0.1 0.6 0.6" Specular="0.5" Shininess="256" Reflection="0.2"/>
 
@@ -28,7 +31,10 @@
 
 	<Geometry>
 	    <Implicits>
-			<!--Object Name="LightSphere" Type="Sphere" Position="0 0 2" Radius="0.1" Material="white"/-->
+			<Object Name="Sphere1" Type="Sphere" Position="1 -1 3" Radius="0.15" Material="mat5"/>
+		    <Object Name="Sphere2" Type="Sphere" Position="-1 1 3" Radius="0.15" Material="mat5"/>
+		    <Object Name="Sphere3" Type="Sphere" Position=" 0.3 -0.2 2.4" Radius="0.15" Material="mat5"/>
+
 		</Implicits>
 
 		<Points>
@@ -45,6 +51,15 @@
 			<Point Name="mLOH" Position="-0.2 1 2.25"/>
 			<Point Name="mROV" Position= "0.2 1 1.75"/>
 			<Point Name="mROH" Position= "0.2 1 2.25"/>
+
+			<Point Name="box1-LUH" Position="-0.8 -1 2.5"/>
+			<Point Name="box1-ROH" Position= "-0.3 0.2  2.5"/>
+			<Point Name="box1-LOH" Position="-0.8 0.2  2.5"/>
+			<Point Name="box1-RUH" Position="-0.3 -1  2.5"/>
+			<Point Name="box1-LUV" Position="-0.8 -1 2"/>
+			<Point Name="box1-RUV" Position= "-0.3 -1 2"/>
+			<Point Name="box1-ROV" Position= "-0.3 0.2  2"/>
+			<Point Name="box1-LOV" Position="-0.8 0.2  2"/>
 
 		</Points>
 		<Triangles>
@@ -71,6 +86,19 @@
 			<Triangle Name="decke6" A="ROV" B="ROH" C="mROH" Material="white" />
 			<Triangle Name="decke7" A="mLOH" B="ROH" C="LOH" Material="white" />
 			<Triangle Name="decke8" A="mLOH" B="mROH" C="ROH" Material="white" />
+
+			<!-- first box-->
+			<Triangle Name="box1-vorne1" A="box1-LUV" B="box1-ROV" C="box1-RUV" Material="red" TextureCoords="1 0 0 1 0 0"/>
+			<Triangle Name="box1-vorne2" A="box1-LUV" B="box1-LOV" C="box1-ROV" Material="red" TextureCoords="1 0 1 1 0 1"/>
+			<Triangle Name="box1-hinten1" A="box1-LUH" B="box1-RUH" C="box1-ROH" Material="red" TextureCoords="1 0 0 1 0 0"/>
+			<Triangle Name="box1-hinten2" A="box1-LUH" B="box1-ROH" C="box1-LOH" Material="red" TextureCoords="1 0 1 1 0 1"/>
+			<Triangle Name="box1-links1" A="box1-LUV" B="box1-LUH" C="box1-LOH" Material="red" />
+			<Triangle Name="box1-links2" A="box1-LUV" B="box1-LOH" C="box1-LOV" Material="red" />
+			<Triangle Name="box1-rechts1" A="box1-RUV" B="box1-ROH" C="box1-RUH" Material="red" />
+			<Triangle Name="box1-rechts2" A="box1-RUV" B="box1-ROV" C="box1-ROH" Material="red" />
+			<Triangle Name="box1-oben1" A="box1-LOV" B="box1-LOH" C="box1-ROH" Material="red" />
+			<Triangle Name="box1-oben2" A="box1-LOV" B="box1-ROH" C="box1-ROV" Material="red" />
+
 		</Triangles>
 	</Geometry>
 

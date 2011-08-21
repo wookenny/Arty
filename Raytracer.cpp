@@ -144,16 +144,27 @@ Color Raytracer::localColor(const IntersectionCompound& inter,const Ray& ray) co
 		_scene.getLight(i).getDirectionsToLight( hitpoint, shadow_sampling, lightdirs);
 		real max_spec = 0;
 		foreach(Vector3 &lightdir, lightdirs){
+			//blinn-phong
+			/*
 			lightdir.normalize();
 			Vector3 toEye = _scene.getEye() - hitpoint;
 			toEye.normalize();
 			Vector3 h  = lightdir + toEye;
 			h.normalize();
 			max_spec = std::max(max_spec,inter.normal.dot(h));
-		}
+			*/
 
-		c += (1-shadows[i])*_scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()*m.getSpecular()
-			* std::pow(max_spec,m.getShininess());
+			//only phong:
+			///*
+			lightdir.normalize();
+			Vector3 toEye = _scene.getEye() - hitpoint;
+			toEye.normalize();
+			Vector3 reflected = 2*(lightdir.dot(inter.normal))*inter.normal-lightdir;
+			max_spec = std::max(max_spec,reflected.dot(toEye));
+			//*/
+		}
+		c += (1-shadows[i])*_scene.getLight(i).getIntensity()*_scene.getLight(i).getColor()
+				*m.getSpecular()* std::pow(max_spec,m.getShininess());
 	}
 
 

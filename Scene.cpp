@@ -226,7 +226,15 @@ void Scene::loadScene(const std::string &xmlfile){
 			Vector3 lightpos(it->attribute("Position").value());
 			_lights.push_back(Lightsource(lightpos, it->attribute("Intensity").as_float(),
 					Color(it->attribute("Color").value())));
-
+		}else if( type == "square"){
+			Vector3 lightpos(it->attribute("Position").value());
+			Lightsource l(lightpos, it->attribute("Intensity").as_float(),
+								Color(it->attribute("Color").value()));
+			l.setType(Lightsource::Type::Square);
+			l.setSize(it->attribute("Size").as_float());
+			l.setDirection1(Vector3(it->attribute("Dir1").value()) );
+			l.setDirection2(Vector3(it->attribute("Dir2").value()) );
+			_lights.push_back(l);
 		}else{
 			std::cout<<"Warning: light of type "<<type<<" not supported!"<<std::endl;
 		}

@@ -21,9 +21,9 @@
 	</Lights>
 
     <Materials>
-		<Material Name="mat0" Color="1 1 0" Specular="0.2" Shininess="60" Reflection="0.5"/>
-		<Material Name="mat1" Color="0 1 1" Specular="0.2" Shininess="60" Reflection="0.5"/>
-		<Material Name="mat2" Color="1 0 1" Specular="0.2" Shininess="60" Reflection="0.5"/>
+		<Material Name="mat0" Color="1 1 0" Specular="0.1" Shininess="240" Reflection="0.5"/>
+		<Material Name="mat1" Color="0 1 1" Specular="0.1" Shininess="240" Reflection="0.5"/>
+		<Material Name="mat2" Color="1 0 1" Specular="0.1" Shininess="240" Reflection="0.5"/>
 
 	</Materials>
 
