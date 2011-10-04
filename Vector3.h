@@ -116,7 +116,6 @@ inline Vector3 operator*(real a, const Vector3& vec){
 
 //streamoperator
 inline std::ostream &operator<<(std::ostream &stream, const Vector3 vec){
-	Vector3 v = vec;//used because operator[] is obviously not a const function
-	stream << "( "<<v[0]<<", "<<v[1]<<", "<<v[2]<<" )";
+	stream << "( "<<vec[0]<<", "<<vec[1]<<", "<<vec[2]<<" )";
  	return stream; // must return stream
 }
