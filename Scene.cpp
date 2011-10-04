@@ -91,41 +91,41 @@ void Scene::loadDefaultScene(){
 
 
 		//hinten
-		Triangle* t = new Triangle(_vertices["LUH"],_vertices["ROH"],_vertices["RUH"]);
-		t->setMaterial(&_materials["mat3"]);
-		_objects.push_back(t);//pointers because of polymorphism
+		Triangle t(_vertices["LUH"],_vertices["ROH"],_vertices["RUH"]);
+		t.setMaterial(&_materials["mat3"]);
+		_kd_tree.addTriangle(t);
 
-		t = new Triangle(_vertices["LUH"],_vertices["LOH"],_vertices["ROH"]);
-		t->setMaterial(&_materials["mat3"]);
-		_objects.push_back(t);//pointers because of polymorphism
+		t = Triangle(_vertices["LUH"],_vertices["LOH"],_vertices["ROH"]);
+		t.setMaterial(&_materials["mat3"]);
+		_kd_tree.addTriangle(t);
 
 		//links
-		t = new Triangle(_vertices["LUV"],_vertices["LOH"],_vertices["LUH"]);
-		t->setMaterial(&_materials["mat1"]);
-		_objects.push_back(t);//pointers because of polymorphism
-		t = new Triangle(_vertices["LUV"],_vertices["LOV"],_vertices["LOH"]);
-		t->setMaterial(&_materials["mat1"]);
-		_objects.push_back(t);//pointers because of polymorphism
+		t = Triangle(_vertices["LUV"],_vertices["LOH"],_vertices["LUH"]);
+		t.setMaterial(&_materials["mat1"]);
+		_kd_tree.addTriangle(t);
+		t = Triangle(_vertices["LUV"],_vertices["LOV"],_vertices["LOH"]);
+		t.setMaterial(&_materials["mat1"]);
+		_kd_tree.addTriangle(t);
 		//rechts
-		t = new Triangle(_vertices["RUV"],_vertices["RUH"],_vertices["ROH"]);
-		t->setMaterial(&_materials["mat2"]);
-		_objects.push_back(t);//pointers because of polymorphism
-		t = new Triangle(_vertices["RUV"],_vertices["ROH"],_vertices["ROV"]);
-		t->setMaterial(&_materials["mat2"]);
-		_objects.push_back(t);//pointers because of polymorphism
+		t = Triangle(_vertices["RUV"],_vertices["RUH"],_vertices["ROH"]);
+		t.setMaterial(&_materials["mat2"]);
+		_kd_tree.addTriangle(t);
+		t = Triangle(_vertices["RUV"],_vertices["ROH"],_vertices["ROV"]);
+		t.setMaterial(&_materials["mat2"]);
+		_kd_tree.addTriangle(t);
 
 		//unten
-		t = new Triangle(_vertices["LUV"],_vertices["LUH"],_vertices["RUH"]);
-		t->setMaterial(&_materials["mat5"]);
-		t->setTextureCoords("0 0 1 0 1 1");
-		_objects.push_back(t);//pointers because of polymorphism
-		t = new Triangle(_vertices["LUV"],_vertices["RUH"],_vertices["RUV"]);
-		t->setMaterial(&_materials["mat5"]);
-		t->setTextureCoords("0 0 1 1 0 1");
-		_objects.push_back(t);//pointers because of polymorphism
+		t = Triangle(_vertices["LUV"],_vertices["LUH"],_vertices["RUH"]);
+		t.setMaterial(&_materials["mat5"]);
+		t.setTextureCoords("0 0 1 0 1 1");
+		_kd_tree.addTriangle(t);
+		t = Triangle(_vertices["LUV"],_vertices["RUH"],_vertices["RUV"]);
+		t.setMaterial(&_materials["mat5"]);
+		t.setTextureCoords("0 0 1 1 0 1");
+		_kd_tree.addTriangle(t);
 
 
-				//new sphere
+		//new sphere
 		Sphere* s = new Sphere(Vector3(.3,-1+.3,2),0.3);
 		s->setMaterial(&_materials["mat4"]);
 		_objects.push_back(s);//pointers because of polymorphism

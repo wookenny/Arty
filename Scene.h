@@ -8,6 +8,7 @@
 #include "Material.h"
 #include "Vector3.h"
 #include "Lightsource.h"
+#include "KDTree.h"
 #include "common.h"
 
 
@@ -29,6 +30,7 @@ class Scene{
 		//KD-Tree objects
 		std::vector<Obstacle*> _objects;//pointers because of polymorphism
 		std::vector<Texture*> _textures;//pointers because of polymorphism
+		KDTree _kd_tree;
 
 		std::vector<Lightsource> _lights;
 		std::unordered_map<std::string, Vector3> _vertices;

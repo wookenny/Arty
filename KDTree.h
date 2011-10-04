@@ -1,9 +1,7 @@
 #pragma once
 
 #include <vector>
-//#include "Triangle.h"
-typedef long Triangle;
-
+#include "Triangle.h"
 
 class KDTree{
 
@@ -28,16 +26,19 @@ class KDTree{
 		};
 
 		Node *_root;
-
+		std::vector<Triangle> _triangleStorage;
 
 		/*traversal method. this has to be altered */
 		void traverse(const Node *n, int level) const;
 
 	public:
-		KDTree() = delete;//no default constr!
-		KDTree(float someData);
+		KDTree():_root(0),_triangleStorage(){};
+		//KDTree(float someData); TODO: delete. only for debugging
 		~KDTree(){delete _root;}//this calls a recursive call for all of the rest
-		void traverse(){ traverse(_root, 0); }
+
+		unsigned int addTriangle(Triangle t){  _triangleStorage.push_back(t); return _triangleStorage.size()-1; }
+		void init();
+		void traverse() const { traverse(_root, 0); }
 
 };
 

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 void KDTree::traverse(const Node *n, int level) const{
 	if(level == 0)
@@ -18,7 +19,7 @@ void KDTree::traverse(const Node *n, int level) const{
 		if(n->triags){
 			std::cout<<s<<"data: ";
 			for (unsigned int i =0; i< n->triags->size(); ++i)
-				std::cout<< n->triags->at(i)<<" ";
+				std::cout<< (n->triags->at(i)) <<" ";
 			std::cout<<"\n"<<std::endl;
 		}else{
 			std::cout<<s<<"no data contained\n"<< std::endl;
@@ -31,6 +32,11 @@ void KDTree::traverse(const Node *n, int level) const{
 	}
 }
 
+void KDTree::init(){
+	//TODO build KDTree with given data
+}
+
+/*
 KDTree::KDTree(float someData){
 	_root = new Node(false, someData);
 	//new children
@@ -55,6 +61,7 @@ KDTree::KDTree(float someData){
 			_root->left[0].left[1].triags = new std::vector<Triangle>();
 			_root->left[0].left[1].triags->push_back(2);
 }
+*/
 
 /*
 int main(){
