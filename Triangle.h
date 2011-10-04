@@ -24,8 +24,7 @@ class Triangle: public Obstacle{
 		int getDominantAxis() const{
 			return (abs(_normal[0])>abs(_normal[1]))?
 				(abs(_normal[0])>abs(_normal[2])?0:2):
-				(abs(_normal[1])>abs(_normal[2])?1:2);
-				
+				(abs(_normal[1])>abs(_normal[2])?1:2);	
 		} 		
 		
 
@@ -35,6 +34,10 @@ class Triangle: public Obstacle{
 			//c_strs
 		Triangle( const Vector3& v1, const Vector3& v2, const Vector3& v3);
 
+
+		Vector3 getV1() const{return _v1;}
+		Vector3 getV2() const{return _v2;}
+		Vector3 getV3() const{return _v3;}
 		
 		void setNormals(const Vector3  n1, const Vector3 n2, const Vector3 n3){
 			_normals[0] = n1;_normals[1] = n2;_normals[2] = n3;
@@ -45,3 +48,10 @@ class Triangle: public Obstacle{
 		void setTextureCoords(std::string coords);
 
 };
+
+//streamoperator
+inline std::ostream &operator<<(std::ostream &stream, const Triangle t){
+	stream << t.getV1()<<", "<<t.getV2()<<", "<<t.getV3();
+ 	return stream; // must return stream
+}
+
