@@ -56,12 +56,12 @@ KDTree::KDTree(float someData){
 			_root->left[0].left[1].triags->push_back(2);
 }
 
-
-
+/*
 int main(){
 
 	KDTree tree(12);
 	tree.traverse();
 
 }
+*/
 

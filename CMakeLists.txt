@@ -20,6 +20,8 @@ Texture.h
 MonochromaticTexture.h
 ChessboardTexture.h
 ImageTexture.h
+KDTree.h
+KDTree.cpp
 Lightsource.h
 Lightsource.cpp
 Main.cpp
