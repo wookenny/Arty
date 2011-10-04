@@ -252,7 +252,7 @@ void Raytracer::trace(int t){
 	std::vector<std::thread> threads;
 	tilesToTrace_.clear();
 	curr_ = 0;
-	uint x = 0,y = 0, x_step = 10, y_step = 10;//TODO fix stepsize
+	uint x = 0,y = 0, x_step = 32, y_step = 32;//TODO fix stepsize
 
 	while( x <  _scene.getImage().getWidth()){
 		uint x2 = std::min(x+x_step,_scene.getImage().getWidth());
