@@ -32,6 +32,30 @@ void KDTree::traverse(const Node *n, int level) const{
 	}
 }
 
+int KDTree::addTriangle(Triangle t){
+	if (_triangleStorage.empty()){
+		//init bounds with the dimension of the first point in the triangle
+		_bounds[0][0] = _bounds[0][1] = t.getV1()[0];
+		_bounds[1][0] = _bounds[1][1] = t.getV1()[1];
+		_bounds[2][0] = _bounds[2][1] = t.getV1()[2];
+	}
+
+	//set the real max,min positions
+	for(int dim = 0; dim <3; ++dim){
+		_bounds[dim][0] = std::min( _bounds[dim][0],  t.getV1()[dim]);
+		_bounds[dim][1] = std::max( _bounds[dim][1],  t.getV1()[dim]);
+		_bounds[dim][0] = std::min( _bounds[dim][0],  t.getV2()[dim]);
+		_bounds[dim][1] = std::max( _bounds[dim][1],  t.getV2()[dim]);
+		_bounds[dim][0] = std::min( _bounds[dim][0],  t.getV3()[dim]);
+		_bounds[dim][1] = std::max( _bounds[dim][1],  t.getV3()[dim]);
+
+	}
+
+	_triangleStorage.push_back(t);
+	return _triangleStorage.size()-1;
+
+}
+
 void KDTree::init(){
 	//TODO build KDTree with given data
 }

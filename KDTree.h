@@ -5,7 +5,6 @@
 #include "Obstacle.h"
 
 class KDTree{
-
 	private:
 		//Node structure for the tree
 		struct Node{
@@ -29,17 +28,20 @@ class KDTree{
 
 		Node *_root;
 		std::vector<Triangle> _triangleStorage;
+		float _bounds[3][2];
 
 
 		/*traversal method. this has to be altered */
 		void traverse(const Node *n, int level) const;
 
 	public:
+
+
 		KDTree():_root(0),_triangleStorage(){};
 		//KDTree(float someData); TODO: delete. only for debugging
 		~KDTree(){delete _root;}//this calls a recursive call for all of the rest
 
-		unsigned int addTriangle(Triangle t){  _triangleStorage.push_back(t); return _triangleStorage.size()-1; }
+		int addTriangle(Triangle t);
 		void init();
 		void traverse() const { traverse(_root, 0); }
 
