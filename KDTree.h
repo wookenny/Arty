@@ -2,10 +2,12 @@
 
 #include <vector>
 #include "Triangle.h"
+#include "Obstacle.h"
 
 class KDTree{
 
 	private:
+		//Node structure for the tree
 		struct Node{
 			bool isLeaf; //1 byte
 			float split; //4 byte
@@ -28,6 +30,7 @@ class KDTree{
 		Node *_root;
 		std::vector<Triangle> _triangleStorage;
 
+
 		/*traversal method. this has to be altered */
 		void traverse(const Node *n, int level) const;
 
@@ -40,6 +43,6 @@ class KDTree{
 		void init();
 		void traverse() const { traverse(_root, 0); }
 
+		IntersectionCompound getIntersection(const Ray&) const;
 };
-
 

@@ -10,6 +10,7 @@ set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS " -lz -lpng -pthread")
 
 # collect all sources (copy from 'ls -1 *.h *.cpp')
 SET(ArtySources
+AABB-triangle-overlap.cpp
 Color.cpp
 Color.h
 common.h

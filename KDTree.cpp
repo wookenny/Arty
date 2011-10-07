@@ -36,6 +36,13 @@ void KDTree::init(){
 	//TODO build KDTree with given data
 }
 
+
+IntersectionCompound KDTree::getIntersection(const Ray&) const{
+	//TODO: use the tree to find the nearest intersection
+	IntersectionCompound inter;
+	return 	inter;
+}
+
 /*
 KDTree::KDTree(float someData){
 	_root = new Node(false, someData);
