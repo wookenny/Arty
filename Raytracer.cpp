@@ -336,10 +336,9 @@ real Raytracer::inShadow(const Vector3& coord, const Lightsource &light, int num
 					break;	//no need to find out how much objects block the view
 				}
 		}
-		//+ kd-tree testen
 		if(not hit){
 		IntersectionCompound inter =  _scene.getIntersectionWithKDTree(ray);
-		if(inter.t>0)
+		if(inter.t > eps  and inter.t < distance)
 			shadow_hits+=1;
 		}
 	}
