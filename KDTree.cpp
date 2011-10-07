@@ -37,9 +37,16 @@ void KDTree::init(){
 }
 
 
-IntersectionCompound KDTree::getIntersection(const Ray&) const{
-	//TODO: use the tree to find the nearest intersection
+IntersectionCompound KDTree::getIntersection(const Ray& r) const{
+	//TODO: use the tree to find the nearest intersection, this is too pricy O(n)
 	IntersectionCompound inter;
+	real nearest = std::numeric_limits<real>::infinity();
+	foreach(const Triangle& triag, _triangleStorage){
+		IntersectionCompound tmp = triag.getIntersection(r);
+		//test if there is a ral hit AND if the hit triangle is nearest than the nearest so far
+		if( tmp.t > 0 and tmp.t < nearest)
+			inter = tmp;
+	}
 	return 	inter;
 }
 

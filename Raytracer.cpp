@@ -72,12 +72,18 @@ Color Raytracer::traceRay(const Ray& ray) const{
 	intersection.t = -1;
 	intersection.mat = 0;
 
+
+	//TODO: delete this part, use only the
 	//test for nearest intersections
 	for(unsigned int i=0; i< _scene.getNumObjects(); ++i){
 		IntersectionCompound inter = _scene.getObject(i)->getIntersection(ray);
 		if(inter.t>0 && ( inter.t < intersection.t or intersection.t==-1))
 			intersection = inter;
 	}
+	//+ kd-tree testen
+	IntersectionCompound inter =  _scene.getIntersectionWithKDTree(ray);
+	if(inter.t>0 && ( inter.t < intersection.t or intersection.t==-1))
+			intersection = inter;
 
 	//calculate color and recursive call
 	if( intersection.t > eps and intersection.mat!=0){//something hit?
@@ -316,7 +322,8 @@ real Raytracer::inShadow(const Vector3& coord, const Lightsource &light, int num
 		lightdir.normalize();
 		Ray ray(coord+eps*lightdir,lightdir);
 
-		//TODO: do something better here
+		//TODO: do something better here AND work only with the kd_tree
+		bool hit = false;
 		for(unsigned int i=0; i<_scene.getNumObjects(); ++i){
 			IntersectionCompound inter;
 			//prevent jumps on uninitialised values
@@ -325,8 +332,15 @@ real Raytracer::inShadow(const Vector3& coord, const Lightsource &light, int num
 			inter = _scene.getObject(i)->getIntersection(ray);
 			if(inter.t > eps  and inter.t < distance){
 					shadow_hits+=1;
+					hit = true;
 					break;	//no need to find out how much objects block the view
 				}
+		}
+		//+ kd-tree testen
+		if(not hit){
+		IntersectionCompound inter =  _scene.getIntersectionWithKDTree(ray);
+		if(inter.t>0)
+			shadow_hits+=1;
 		}
 	}
 	//1 => totally in shadow, 0 => no shadow at all

@@ -55,7 +55,8 @@ class Scene{
 
 		void loadScene(const std::string &xmlfile);
 		void loadDefaultScene();
-
+		IntersectionCompound getIntersectionWithKDTree(const Ray& ray) const{
+			return _kd_tree.getIntersection(ray);}
 
 		//setter
 		void setEyepoint(const Vector3& e){_eye = e;}
