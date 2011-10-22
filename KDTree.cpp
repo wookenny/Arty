@@ -66,8 +66,8 @@ void KDTree::init(){
 		contained.push_back(&_triangleStorage.at(i));
 	
 	
-	std::cout<<"kd-tree node with bounds:"
-		 << "["<<_boxMin<<";" << _boxMax[0]<<"]x["
+	std::cout<<"initialising kd-tree node with bounds:"
+		 << "["<<_boxMin[0]<<";" << _boxMax[0]<<"]x["
 		 << _boxMin[1]<<";" << _boxMax[1]<<"]x["
 		 << _boxMin[2]<<";" << _boxMax[2]<<"]"<<std::endl;
 	std::cout<<" triangles: "<<contained.size()<<std::endl;

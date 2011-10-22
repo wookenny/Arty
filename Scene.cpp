@@ -145,7 +145,7 @@ void Scene::loadDefaultScene(){
 		l.setDirection2(Vector3(0,0,1));
 		_lights.push_back(l);
 
-
+		_kd_tree.init();
 
 }
 
