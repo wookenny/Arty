@@ -122,12 +122,3 @@ void Triangle::setTextureCoords(std::string str){
 
 }
 
-
-inline bool Triangle::overlapAABB(real boxcenter[3],real boxhalfsize[3]) const{
-	/*uses fast implementation from Tomas Akenine-Möller*/
-	real tri[3][3] = { {_v1[0],_v1[1],_v1[2]},
-					   {_v2[0],_v2[1],_v2[2]},
-					   {_v3[0],_v3[1],_v3[2]}};
-	return	triBoxOverlap(boxcenter,boxhalfsize,tri);
-}
-

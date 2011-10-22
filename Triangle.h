@@ -1,6 +1,7 @@
 #pragma once
 #include "Obstacle.h"
 #include <cstdlib>
+#include "AABB-triangle-overlap.h"
 
 class Triangle: public Obstacle{
 
@@ -46,7 +47,8 @@ class Triangle: public Obstacle{
 		}
 
 		void setTextureCoords(std::string coords);
-		inline	bool overlapAABB(real boxcenter[3],real boxhalfsize[3]) const;
+		bool overlapAABB(const Vector3 &boxMin, const Vector3 &boxMax) const{ 
+					return triBoxOverlap(boxMin,boxMax,this);}
 
 };
 

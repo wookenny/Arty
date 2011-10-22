@@ -2,6 +2,9 @@
 
 #include "common.h"
 
+//needed forward declarations
+class Triangle;
+class Vector3;
 
 /********************************************************/
 /* header for AABB-triangle overlap test code                      */
@@ -10,5 +13,8 @@
 /*          float boxhalfsize[3],float triverts[3][3]); */
 /********************************************************/
 
-bool triBoxOverlap(real boxcenter[3],real boxhalfsize[3], real tri[3][3 ]);
+
+bool triBoxOverlap(const Vector3 &boxMin,const Vector3 &boxMax, const Triangle *tri);
+inline bool triBoxOverlap(const Vector3 &boxMin,const Vector3 &boxMax, const Triangle &tri){
+			return triBoxOverlap(boxMin, boxMax, &tri);}
 
