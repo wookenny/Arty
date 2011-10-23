@@ -59,7 +59,7 @@ int KDTree::addTriangle(Triangle t){
 }
 
 void KDTree::init(){
-	//TODO build KDTree with given data
+
 	_root = new Node();
 	std::vector<Triangle*> contained;
 	for(unsigned int i=0; i<_triangleStorage.size(); ++i)
@@ -87,7 +87,7 @@ real KDTree::_getOptimalSplitPosition(std::vector<Triangle*> &containedTrigs,
 	real area = _area(boxMin, boxMax);
 	real no_split = area*containedTrigs.size()*COST_INTERSECTION ;
 
-	real split_pos = boxMin[level%3] - 1;
+	real split_pos = boxMin[level%3];
 	real best_cost = no_split;
 	  
 	std::vector<real> positions;
@@ -143,23 +143,27 @@ void KDTree::_buildkdtree(Node* node, std::vector<Triangle*> containedTrigs,
 	real splitpos = _getOptimalSplitPosition(containedTrigs,boxMin,boxMax,level);
 
 	//is the new node a leaf?
-	if(splitpos <  boxMin[level%3] ){
+	//do not split such that the resulting cube has a volumue of zero
+	if(splitpos-eps <=  boxMin[level%3]  or splitpos+eps >=  boxMax[level%3]){
 		node->isLeaf = true;
 		node->split = 0.f;
 		node->triags = new std::vector<Triangle*>;
 		foreach(Triangle* t, containedTrigs)
 			node->triags->push_back(t);
+		std::cout<<"building leaf at level "<<level<<" with "<<containedTrigs.size()<<" triangles"
+		 <<" and bounds: "<< "["<<boxMin[0]<<";" << boxMax[0]<<"]x["
+		 << boxMin[1]<<";" << boxMax[1]<<"]x["
+		 << boxMin[2]<<";" << boxMax[2]<<"]"<<std::endl;
 		return;
 	}
 	
 	
+	//find all correct triangles
 	std::vector<Triangle*> contained_left, contained_right;
 	Vector3 split_position = boxMax;
 	split_position[level%3] = splitpos;
-	//leftnode = new Node();
-	//rightnode = new Node();
 
-
+	//assign triangles to sides(can be on both)
 	Triangle *t;
 	foreach(t, containedTrigs){
 		if ( t->overlapAABB(boxMin, split_position) ) 
@@ -168,23 +172,48 @@ void KDTree::_buildkdtree(Node* node, std::vector<Triangle*> containedTrigs,
 			contained_right.push_back(t);
 	}
 
-	//set correct date for the node:
+	//set correct date for the current node:
 	//isLeaf, split and left or triags
-	//buildkdtree( leftnode,  containedLeft, bounds_left, level+1  );
-	//buildkdtree( rightnode, containedRight, bounds_right, level+1 );
+	node->isLeaf = false;
+	node->split = splitpos;
+	node->triags = new std::vector<Triangle*>;
+	foreach(Triangle* t, containedTrigs)
+		node->triags->push_back(t);	
+
+	std::cout<< "Spltting node at level "<<level<<" at position "<<splitpos <<std::endl;
+	node->left = new Node[2];	
+	Node *leftnode = node->left;
+	Node *rightnode = node->left+1;
+	_buildkdtree( leftnode,  contained_left, boxMin, split_position, level+1  );
+	_buildkdtree( rightnode, contained_right, split_position, boxMax, level+1 );
 }
 
+
+void KDTree::_getIntersection(const Vector3 &origin, const Vector3 &direction, IntersectionCompound &inter) const{
+	//find position in kdtree
+
+	//check for nearest intersection
+
+	//if intersection => return inter.
+
+	//if no intersection => extend oring to next border, add EPS and do a recursive call,
+	//no next border => end
+	
+}		
 
 IntersectionCompound KDTree::getIntersection(const Ray& r) const{
 	//TODO: use the tree to find the nearest intersection, this is too pricy O(n)
 	IntersectionCompound inter;
 	real nearest = std::numeric_limits<real>::infinity();
+	//_getIntersection( r.getOrigin(), r.getDirection(), inter);
+	///*
 	foreach(const Triangle& triag, _triangleStorage){
 		IntersectionCompound tmp = triag.getIntersection(r);
 		//test if there is a real hit AND if the hit triangle is nearer than the nearest so far
 		if( tmp.t > 0 and tmp.t < nearest)
 			inter = tmp;
 	}
+	//*/
 	return 	inter;
 }
 

@@ -47,7 +47,9 @@ class KDTree{
 				      + (boxMax[1]-boxMin[1])*(boxMax[2]-boxMin[2])
 				      + (boxMax[2]-boxMin[2])*(boxMax[0]-boxMin[0]) );
 		}
-		
+
+		void _getIntersection(const Vector3 &origin, const Vector3 &direction, IntersectionCompound &inter) const;		
+
 	public:
 
 
