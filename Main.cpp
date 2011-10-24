@@ -10,7 +10,7 @@
 #include <string>
 
 int main(int args, char** argv){
-
+	
 	Raytracer rt;
 	if(args>1){
 		rt.loadScene( argv[1] );

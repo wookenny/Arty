@@ -34,6 +34,7 @@ pugiconfig.hpp
 pugixml.hpp
 pugixml.cpp
 Ray.h
+Ray.cpp
 Raytracer.cpp
 Raytracer.h
 Scene.h

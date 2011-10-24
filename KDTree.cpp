@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <cassert>
 
 void KDTree::traverse(const Node *n, int level) const{
 	if(level == 0)
@@ -189,31 +190,93 @@ void KDTree::_buildkdtree(Node* node, std::vector<Triangle*> containedTrigs,
 }
 
 
-void KDTree::_getIntersection(const Vector3 &origin, const Vector3 &direction, IntersectionCompound &inter) const{
-	//find position in kdtree
-
-	//check for nearest intersection
-
-	//if intersection => return inter.
-
-	//if no intersection => extend oring to next border, add EPS and do a recursive call,
-	//no next border => end
-	
-}		
-
-IntersectionCompound KDTree::getIntersection(const Ray& r) const{
-	//TODO: use the tree to find the nearest intersection, this is too pricy O(n)
-	IntersectionCompound inter;
+void KDTree::_getIntersection(Vector3 &position, const Ray &r, IntersectionCompound &inter) const{
+	//TODO: delete this bad version 	
+	/*
 	real nearest = std::numeric_limits<real>::infinity();
-	//_getIntersection( r.getOrigin(), r.getDirection(), inter);
-	///*
 	foreach(const Triangle& triag, _triangleStorage){
 		IntersectionCompound tmp = triag.getIntersection(r);
 		//test if there is a real hit AND if the hit triangle is nearer than the nearest so far
-		if( tmp.t > 0 and tmp.t < nearest)
+		if( tmp.t > 0 and tmp.t < nearest){
 			inter = tmp;
+			nearest = tmp.t;		
+		}
 	}
-	//*/
+	 */
+
+	//find position in kdtree and store the bounds
+	Node *leaf = _root;
+	int level = -1;
+	Vector3 boxMax = _boxMax;
+	Vector3 boxMin = _boxMin;
+	while(not (leaf->isLeaf)){
+		++level;		
+		//to right or to left?
+		if(position[level%3] <= leaf->split){
+			leaf = leaf->left;
+			boxMax[level%3] = leaf->split;	
+		}else{
+		 	leaf = leaf->left+1;
+			boxMin[level%3] = leaf->split;
+		}	
+	}
+
+	//check for nearest intersection
+	real nearest = std::numeric_limits<real>::infinity();
+	
+	foreach(Triangle *triag, *leaf->triags){
+		IntersectionCompound tmp = triag->getIntersection(r);
+		//test if there is a real hit AND if the hit triangle is nearer than the nearest so far
+		if( tmp.t > 0 and tmp.t < nearest){
+			inter = tmp;
+			nearest = tmp.t;		
+		}
+	}
+	
+	//if intersection => return inter.
+	if (nearest < std::numeric_limits<real>::infinity())
+		return;
+
+	//if no intersection => extend oring to next border, add EPS 
+	//boxMin/boxMax = position + dist * ray.origin 	
+	real distToBox = r.intersectBox(boxMin, boxMax);
+	//TODO: hää?	
+	//	assert( distToBox >= -eps);//position shas to be inside a box, therfore there has to be a collision
+	if(distToBox < -eps){
+		inter = IntersectionCompound();
+		return; 
+	}
+	//	std::cout<< "Warning: dist to box = "<<distToBox<<std::endl;
+	position +=  (distToBox+eps)*r.getOrigin();//edd eps to be sureto be inside a box
+
+	//no next border => end(no intersection)
+	if( position[0] >= _boxMax[0] or position[1] >= _boxMax[1] or position[2] >= _boxMax[2]){
+		inter = IntersectionCompound();
+		return;	
+	}	
+	
+	//recursive call of this function
+	return _getIntersection(position, r, inter);
+}		
+
+IntersectionCompound KDTree::getIntersection(const Ray& r) const{
+	IntersectionCompound inter;
+
+	Vector3 position = r.getOrigin();
+	//move position inside the cube!
+	//if not possible: return
+	if(    not(_boxMin[0] <= position[0] and position[0] <= _boxMax[0])
+            or not(_boxMin[1] <= position[1] and position[1] <= _boxMax[2])
+	    or not(_boxMin[2] <= position[2] and position[2] <= _boxMax[2])){
+		
+		real distToBox = r.intersectBox(_boxMin, _boxMax);
+		if(distToBox<0)//no intersection with the kdtree
+			return inter;
+		position += (distToBox+eps)*r.getDirection();
+	}
+	//find the nearest intersection
+	_getIntersection(position, r, inter);
+
 	return 	inter;
 }
 
