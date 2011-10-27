@@ -91,7 +91,9 @@ Color Raytracer::traceRay(const Ray& ray) const{
 
 		if(intersection.mat->getReflection()>eps and ray.getDepth()>0){
 			Ray reflectedRay = Ray::getReflectedRay(ray,intersection.t,intersection.normal);
-			col += intersection.mat->getReflection()*traceRay(reflectedRay);
+			reflectedRay.multiplyStrength(intersection.mat->getReflection());
+			if(reflectedRay.getStrength() > 0.01)//more than 1% influence on the color
+				col += intersection.mat->getReflection()*traceRay(reflectedRay);
 		//TODO: tranparenz erweitern
 		}
 	}

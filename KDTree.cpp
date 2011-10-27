@@ -247,16 +247,20 @@ void KDTree::_getIntersection(Vector3 &position, const Ray &r, IntersectionCompo
 		return; 
 	}
 	//	std::cout<< "Warning: dist to box = "<<distToBox<<std::endl;
-	position +=  (distToBox+eps)*r.getOrigin();//edd eps to be sureto be inside a box
+	
+	//Vector3 oldPos = position;
+	position +=  (distToBox+eps)*r.getDirection();//edd eps to be sureto be inside a box
 
 	//no next border => end(no intersection)
-	if( position[0] >= _boxMax[0] or position[1] >= _boxMax[1] or position[2] >= _boxMax[2]){
-		inter = IntersectionCompound();
+	if(    position[0] >= _boxMax[0] or position[1] >= _boxMax[1] or position[2] >= _boxMax[2]
+	    or position[0] <= _boxMin[0] or position[1] <= _boxMin[1] or position[2] <= _boxMin[2]){
+		inter.t  = -1;//no intersection, set dist to -1
 		return;	
 	}	
 	
 	//recursive call of this function
-	return _getIntersection(position, r, inter);
+	//std::cout<<"was at: "<<oldPos <<"\tnow at: "<<position<<std::endl;
+	_getIntersection(position, r, inter);
 }		
 
 IntersectionCompound KDTree::getIntersection(const Ray& r) const{
@@ -265,13 +269,14 @@ IntersectionCompound KDTree::getIntersection(const Ray& r) const{
 	Vector3 position = r.getOrigin();
 	//move position inside the cube!
 	//if not possible: return
-	if(    not(_boxMin[0] <= position[0] and position[0] <= _boxMax[0])
-            or not(_boxMin[1] <= position[1] and position[1] <= _boxMax[2])
-	    or not(_boxMin[2] <= position[2] and position[2] <= _boxMax[2])){
+	if(    (_boxMin[0]  > position[0] or position[0] > _boxMax[0])
+            and (_boxMin[1] > position[1] or position[1] > _boxMax[2])
+	    and (_boxMin[2] > position[2] or position[2] > _boxMax[2])){
 		
 		real distToBox = r.intersectBox(_boxMin, _boxMax);
 		if(distToBox<0)//no intersection with the kdtree
 			return inter;
+
 		position += (distToBox+eps)*r.getDirection();
 	}
 	//find the nearest intersection
