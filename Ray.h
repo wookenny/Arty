@@ -17,7 +17,7 @@ private:
 		_inv_direction = Vector3(1/_direction[0], 1/_direction[1], 1/_direction[2]);
 		_sign[0] = (_inv_direction[0] < 0);
 		_sign[1] = (_inv_direction[1] < 0);
-		_sign[2] = (_inv_direction[1] < 0);
+		_sign[2] = (_inv_direction[2] < 0);
 	}
 
 public:
@@ -39,9 +39,10 @@ public:
 	void setRaydepth(int r){ _raydepth = r;}
 	void multiplyStrength(float m){_strength *= m;} 
 
-	real intersectBox(const Vector3 &boxMin, const Vector3 &boxMax) const;
-
-
+	real intersectBox(const Vector3 &boxMin, const Vector3 &boxMax, const Vector3 &pos,bool debug = false) const;
+	inline real intersectBox(const Vector3 &boxMin, const Vector3 &boxMax) const{
+		return 	intersectBox(boxMin, boxMax, _origin);
+	}
 
 	//static
 	static Ray getReflectedRay(const Ray& ray, real t, const Vector3& normal){
