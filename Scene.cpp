@@ -66,6 +66,8 @@ void Scene::loadDefaultScene(){
 		blueish = new MonochromaticTexture(0.0,0.0,0.8);
 		chessboard = new ChessboardTexture();
 
+		//TODO: delete material afterwards
+
 		mat1.setTexture(red);
 		mat2.setTexture(green);
 		mat3.setTexture(white);
@@ -299,15 +301,16 @@ void Scene::loadScene(const std::string &xmlfile){
 	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
 		std::string name = it->attribute("Name").value();
 
-		Triangle *t = new Triangle( 	_vertices[it->attribute("A").value()],
-						_vertices[it->attribute("B").value()],
-						_vertices[it->attribute("C").value()]);
-		t->setMaterial(&_materials[ it->attribute("Material").value() ]);
+		Triangle t( 	_vertices[it->attribute("A").value()],
+				_vertices[it->attribute("B").value()],
+				_vertices[it->attribute("C").value()]);
+		t.setMaterial(&_materials[ it->attribute("Material").value() ]);
 
 		if( it->attribute("TextureCoords") )
-			t->setTextureCoords(it->attribute("TextureCoords").value());
-
-		_objects.push_back(t);
+			t.setTextureCoords(it->attribute("TextureCoords").value());
+		
+		//_objects.push_back(t);
+		_kd_tree.addTriangle(t);
 	}
 
 	//get off files
@@ -320,6 +323,9 @@ void Scene::loadScene(const std::string &xmlfile){
 						it->attribute("z1").as_float(),it->attribute("z2").as_float(),
 						it->attribute("Material").value());
 	}
+
+	//init the KD-Tree
+	_kd_tree.init();
 }
 
 void Scene::loadOFF_File(const std::string &str, real x_min,
@@ -441,12 +447,20 @@ void Scene::loadOFF_File(const std::string &str, real x_min,
 		long a = triangleList[i].get<0>();
 		long b = triangleList[i].get<1>();
 		long c = triangleList[i].get<2>();
+		/*
 		Triangle *t = new Triangle( 	_vertices[str + boost::lexical_cast<std::string>(a)],
 						_vertices[str + boost::lexical_cast<std::string>(b)],
 						_vertices[str + boost::lexical_cast<std::string>(c)]);
 		t->setMaterial(&_materials[ material ]);
 		t->setNormals( normals[a], normals[b], normals[c] );
 		_objects.push_back(t);
+		*/
+		Triangle t( 	_vertices[str + boost::lexical_cast<std::string>(a)],
+				_vertices[str + boost::lexical_cast<std::string>(b)],
+				_vertices[str + boost::lexical_cast<std::string>(c)]);
+		t.setMaterial(&_materials[ material ]);
+		t.setNormals( normals[a], normals[b], normals[c] );
+		_kd_tree.addTriangle(t);
 	}
 
 

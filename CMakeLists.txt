@@ -8,7 +8,7 @@ set(CMAKE_CXX_FLAGS "-g -Wall -fopenmp -DN_DEBUG -mfpmath=sse -O3 -m64 -pipe -fm
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS " -lz -lpng -pthread")
 
 
-# collect all sources (copy from 'ls -1 *.h *.cpp')
+# collect all sources (copy from 'ls -1 *.cpp')
 SET(ArtySources
 AABB-triangle-overlap.cpp
 Color.cpp

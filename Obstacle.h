@@ -6,7 +6,7 @@
 #include "Material.h"
 #include <utility>
 #include <cmath> 
-#include<limits>
+#include <limits>
 
 struct IntersectionCompound{
 	Material *mat;
