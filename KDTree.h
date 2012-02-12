@@ -9,7 +9,8 @@
 class KDTree{
 	private:
 		//Node structure for the tree
-		struct Node{
+		struct Node
+		{
 			bool isLeaf; //1 byte
 			float split; //4 byte
 			union{ //8 byte
@@ -17,23 +18,15 @@ class KDTree{
 				std::unique_ptr<std::vector<Triangle*> > triags;
 			}; // => in total: 13 byte, so it will take 16 byte
 			//default node constr.
-			Node(bool leaf = false, float s = 0.f):isLeaf(leaf),split(s),left(nullptr)/* triags implicitly to 0!*/{}
+			Node(bool leaf = false, float s = 0.f):isLeaf(leaf),split(s),left(nullptr){}
+			//compiler error: default destructor would be ill-formed 			
 			~Node(){}			
-			//node destructor, depends heavily on the right initialization
-			/*			
-			~Node(){
-				if(isLeaf and triags)
-					delete triags;
-				else
-					delete [] left;
-			}
-			*/
+		
 		};
 
 		std::unique_ptr<Node> _root;
 		std::vector<Triangle> _triangleStorage;
-		Vector3 _boxMin,_boxMax;
-
+		Vector3 _boxMin, _boxMax;
 		
 		static const int COST_INTERSECTION = 10;
 		static const int COST_TRAVERSAL = 2;
@@ -56,9 +49,7 @@ class KDTree{
 
 	public:
 
-
 		KDTree():_root(nullptr),_triangleStorage(){};
-		//~KDTree(){delete _root;}//this calls a recursive call for all of the rest
 
 		int addTriangle(Triangle t);
 		void init();
