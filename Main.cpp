@@ -11,17 +11,24 @@
 
 int main(int args, char** argv){
 
+	//DEBUG KD-Tree
 	/*
-	//( 0.0001, 0.0001, -1.9999 )  direction: ( 0.197858, 6.94377e-05, 0.980231 )
-	Vector3 pos = Vector3(0.0001, 0.0001, -1.9999 );
-	Vector3 dir = Vector3( 0.300784, 0.30182, 0.904673 );
-	Vector3 boxMin(-1,-1,1);
-	Vector3 boxMax(1,1,3);
-	Ray r(pos,dir);
-	real distToBox = r.intersectBox(boxMin, boxMax, pos, true);
-	std::cout<< distToBox <<std::endl;
+	KDTree kd_tree;
 
-	return 0;
+	kd_tree.traverse();
+
+	Vector3 a1(0,1,2), b1(2,3,5), c1(2,3,1);
+	Vector3 a2(0,0.1,0.2), b2(0.1,0,0.4), c2(0,0.5,0.5);
+	Vector3 a3(6,6.1,6.2), b3(6.1,6,6.4), c3(6,6.5,6.5);
+	Triangle t1(a1,b1,c1);	
+	Triangle t2(a2,b2,c2);
+	Triangle t3(a3,b3,c3);
+
+	kd_tree.addTriangle(t1);
+	kd_tree.addTriangle(t2);
+	kd_tree.addTriangle(t3);	
+	kd_tree.init();
+	kd_tree.traverse();
 	*/
 	Raytracer rt;
 	if(args>1){
@@ -34,6 +41,6 @@ int main(int args, char** argv){
 	else
 		rt.trace();
 	rt.saveImage("traced.png");
-
+	
 }
 

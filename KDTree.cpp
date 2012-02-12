@@ -23,7 +23,7 @@ void KDTree::traverse(const Node *n, int level) const{
 		if(n->triags != nullptr){
 			std::cout<<s<<"data: ";
 			for (unsigned int i =0; i< n->triags->size(); ++i)
-				std::cout<< (n->triags->at(i)) <<" ";
+				std::cout<< (*n->triags->at(i)) <<"; ";
 			std::cout<<"\n"<<std::endl;
 		}else{
 			std::cout<<s<<"no data contained\n"<< std::endl;
@@ -162,14 +162,16 @@ void KDTree::_buildkdtree(Node* node, std::vector<Triangle*> containedTrigs,
 	
 	//find all correct triangles
 	std::vector<Triangle*> contained_left, contained_right;
-	Vector3 split_position = boxMax;
-	split_position[level%3] = splitpos;
+	Vector3 split_position_max = boxMax;
+	split_position_max[level%3] = splitpos;
+	Vector3 split_position_min = boxMin;
+	split_position_min[level%3] = splitpos;
 
 	//assign triangles to sides(can be on both)
 	for(Triangle *t: containedTrigs){
-		if ( t->overlapAABB(boxMin, split_position) ) 
+		if ( t->overlapAABB(boxMin, split_position_max) ) 
 			contained_left.push_back(t);
-		if ( t->overlapAABB(split_position, boxMax) )
+		if ( t->overlapAABB(split_position_min, boxMax) )
 			contained_right.push_back(t);
 	}
 
@@ -177,17 +179,17 @@ void KDTree::_buildkdtree(Node* node, std::vector<Triangle*> containedTrigs,
 	//isLeaf, split and left or triags
 	node->isLeaf = false;
 	node->split = splitpos;
-	node->triags = std::move(std::unique_ptr<std::vector<Triangle*> >(new std::vector<Triangle*>));
-	for(Triangle* t: containedTrigs)
-		node->triags->push_back(t);	
+	//node->triags = std::move(std::unique_ptr<std::vector<Triangle*> >(new std::vector<Triangle*>));
+	//for(Triangle* t: containedTrigs)
+	//	node->triags->push_back(t);	
 
 	std::cout<< "Spltting node at level "<<level<<" at position "<<splitpos <<std::endl;
 	
 	node->left = std::move(std::unique_ptr<Node[]>(new Node[2]));	
 	Node *leftnode  = &node->left[0];
 	Node *rightnode = &node->left[1];
-	_buildkdtree( leftnode,  contained_left, boxMin, split_position, level+1  );
-	_buildkdtree( rightnode, contained_right, split_position, boxMax, level+1 );
+	_buildkdtree( leftnode,  contained_left, boxMin, split_position_max, level+1  );
+	_buildkdtree( rightnode, contained_right, split_position_min, boxMax, level+1 );
 }
 
 

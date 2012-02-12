@@ -13,14 +13,19 @@ class KDTree{
 		{
 			bool isLeaf; //1 byte
 			float split; //4 byte
-			union{ //8 byte
+			//union{ //8 byte
 				std::unique_ptr<Node[]> left;
 				std::unique_ptr<std::vector<Triangle*> > triags;
-			}; // => in total: 13 byte, so it will take 16 byte
-			//default node constr.
+			//}; // => in total: 13 byte, so it will take 16 byte
+
 			Node(bool leaf = false, float s = 0.f):isLeaf(leaf),split(s),left(nullptr){}
 			//compiler error: default destructor would be ill-formed 			
-			~Node(){}			
+			/*~Node(){ 
+				if(isLeaf)
+					triags.release();
+				else
+					left.release();
+			}*/	
 		
 		};
 
@@ -53,7 +58,10 @@ class KDTree{
 
 		int addTriangle(Triangle t);
 		void init();
-		void traverse() const { traverse(_root.get(), 0); }
+		void traverse() const { if(nullptr!=_root)
+						traverse(_root.get(), 0); 
+					else std::cout<< "Tree not initialized"<<std::endl;
+		}
 
 		IntersectionCompound getIntersection(const Ray&) const;
 };
