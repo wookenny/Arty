@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "Triangle.h"
 #include "Obstacle.h"
+
 
 class KDTree{
 	private:
@@ -11,22 +13,24 @@ class KDTree{
 			bool isLeaf; //1 byte
 			float split; //4 byte
 			union{ //8 byte
-				Node* left;
-				std::vector<Triangle*> *triags;
+				std::unique_ptr<Node[]> left;
+				std::unique_ptr<std::vector<Triangle*> > triags;
 			}; // => in total: 13 byte, so it will take 16 byte
 			//default node constr.
-			Node(bool leaf = false, float s = 0.f):isLeaf(leaf),split(s),left(0)/* triags implicitly to 0!*/{}
+			Node(bool leaf = false, float s = 0.f):isLeaf(leaf),split(s),left(nullptr)/* triags implicitly to 0!*/{}
+			~Node(){}			
 			//node destructor, depends heavily on the right initialization
+			/*			
 			~Node(){
 				if(isLeaf and triags)
 					delete triags;
 				else
 					delete [] left;
 			}
-
+			*/
 		};
 
-		Node *_root;
+		std::unique_ptr<Node> _root;
 		std::vector<Triangle> _triangleStorage;
 		Vector3 _boxMin,_boxMax;
 
@@ -53,12 +57,12 @@ class KDTree{
 	public:
 
 
-		KDTree():_root(0),_triangleStorage(){};
-		~KDTree(){delete _root;}//this calls a recursive call for all of the rest
+		KDTree():_root(nullptr),_triangleStorage(){};
+		//~KDTree(){delete _root;}//this calls a recursive call for all of the rest
 
 		int addTriangle(Triangle t);
 		void init();
-		void traverse() const { traverse(_root, 0); }
+		void traverse() const { traverse(_root.get(), 0); }
 
 		IntersectionCompound getIntersection(const Ray&) const;
 };
