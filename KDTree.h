@@ -12,10 +12,11 @@ class KDTree{
 		struct Node{
 			bool isLeaf; //1 byte
 			float split; //4 byte
-			union{ //8 byte
+			//TODO: inheritance instead of an union
+			//union{ //8 byte
 				std::unique_ptr<Node[]> left;
 				std::unique_ptr<std::vector<Triangle*> > triags;
-			}; // => in total: 13 byte, so it will take 16 byte
+			//}; // => in total: 13 byte, so it will take 16 byte
 			//default node constr.
 			Node(bool leaf = false, float s = 0.f):isLeaf(leaf),split(s),left(nullptr)/* triags implicitly to 0!*/{}
 			~Node(){}			
