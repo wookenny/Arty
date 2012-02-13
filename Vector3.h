@@ -13,7 +13,9 @@ private:
 public:
 	//constructors
 	Vector3(const std::string &str);	
-	Vector3(real r1 = 0, real r2 = 0, real r3 = 0):_data(0.0,3){_data[0]=r1; _data[1]=r2; _data[2]=r3; }
+	Vector3(const real r1 = 0.f, const real r2 = 0.f, const real r3 = 0.f):_data(3){	
+			_data[0]=r1; _data[1]=r2; _data[2]=r3; 
+	}
 	Vector3(const Vector3 &vec):_data(vec._data){}	
 
 	//methods

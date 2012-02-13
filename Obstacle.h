@@ -15,7 +15,7 @@ struct IntersectionCompound{
 	real px,py; //barycentric coords for 2d textures
 	Vector3 hitpoint; //real coordinates for 3d textures	
         
-	 IntersectionCompound():mat(0),t(std::numeric_limits<real>::infinity() ),normal(1,0,0),px(0),py(0){}
+	 IntersectionCompound():mat(nullptr),t(std::numeric_limits<real>::infinity() ),normal(0.f,0.f,1.f),px(0.f),py(0.f),hitpoint(0.f,0.f,0.f){}
 
 };
 
