@@ -25,7 +25,7 @@ int main(int args, char** argv){
 	return 0;
 	*/
 	
-	// /*
+	 /*
 	//Intersection test(Debugging)
 	//triangle: ( -1, -1, 1 ), ( -1, 1, 3 ), ( -1, -1, 3 )
 	//box left: [-1;-0.3]x[-1;1]x[1;3]
@@ -41,7 +41,7 @@ int main(int args, char** argv){
 	std::cout<< "t intersects rightBox: "<< t.overlapAABB(boxRightMin,boxRightMax) << std::endl; 
 	
 	return 0;
-	// */
+	 */
 	
 	Raytracer rt;
 	if(args>1){
