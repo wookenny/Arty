@@ -9,6 +9,7 @@
 #include "Raytracer.h"
 #include <string>
 
+
 int main(int args, char** argv){
 
 	/*
@@ -23,6 +24,25 @@ int main(int args, char** argv){
 
 	return 0;
 	*/
+	
+	// /*
+	//Intersection test(Debugging)
+	//triangle: ( -1, -1, 1 ), ( -1, 1, 3 ), ( -1, -1, 3 )
+	//box left: [-1;-0.3]x[-1;1]x[1;3]
+	//box right: [-0.3;1]x[-1;1]x[1;3]
+	Triangle t(Vector3(-1,-1,1),Vector3(-1,1,3),Vector3(-1,-1,3));
+	Vector3 boxLeftMin(-1,-1,1);
+	Vector3 boxLeftMax(-0.3,1,3);
+	Vector3 boxRightMin(-0.3,-1,1);
+	Vector3 boxRightMax(1,1,3);
+	std::cout<<std::boolalpha;
+	
+	std::cout<< "t intersects leftBox: "<< t.overlapAABB(boxLeftMin,boxLeftMax) << std::endl; 
+	std::cout<< "t intersects rightBox: "<< t.overlapAABB(boxRightMin,boxRightMax) << std::endl; 
+	
+	return 0;
+	// */
+	
 	Raytracer rt;
 	if(args>1){
 		rt.loadScene( argv[1] );

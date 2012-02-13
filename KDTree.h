@@ -34,6 +34,7 @@ class KDTree{
 		std::unique_ptr<Node> _root;
 		std::vector<Triangle> _triangleStorage;
 		Vector3 _boxMin,_boxMax;
+		unsigned int trianglePointers;
 
 		
 		static const int COST_INTERSECTION = 10;

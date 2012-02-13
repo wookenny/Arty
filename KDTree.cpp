@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <thread>
 
 
 void KDTree::traverse(const Node *n, int level) const{
@@ -62,7 +63,7 @@ int KDTree::addTriangle(Triangle t){
 }
 
 void KDTree::init(){
-
+	trianglePointers = 0;
 	_root = std::move(std::unique_ptr<Node>(new Node()));
 	std::vector<Triangle*> contained;
 	for(unsigned int i=0; i<_triangleStorage.size(); ++i)
@@ -75,6 +76,8 @@ void KDTree::init(){
 	std::cout<<" triangles: "<<contained.size()<<std::endl;
 	
 	_buildkdtree(_root.get(), contained, _boxMin, _boxMax, 0);
+	
+	std::cout<<" triangle pointers: "<<trianglePointers<<std::endl;
 }
 
 
@@ -153,6 +156,8 @@ void KDTree::_buildkdtree(Node* node, std::vector<Triangle*> containedTrigs,
 		node->triags = std::move(std::unique_ptr<std::vector<Triangle*> >(new std::vector<Triangle*>));
 		for(Triangle* t: containedTrigs)
 			node->triags->push_back(t);
+		trianglePointers+= node->triags->size();
+		
 		std::cout<<"building leaf at level "<<level<<" with "<<containedTrigs.size()<<" triangles"
 		 <<" and bounds: "<< "["<<boxMin[0]<<";" << boxMax[0]<<"]x["
 		 << boxMin[1]<<";" << boxMax[1]<<"]x["
@@ -207,6 +212,9 @@ void KDTree::_buildkdtree(Node* node, std::vector<Triangle*> containedTrigs,
 	node->left = std::move(std::unique_ptr<Node[]>(new Node[2]));	
 	Node *leftnode  = &node->left[0];
 	Node *rightnode = &node->left[1];
+	
+	//this can be done with two parallel calls => c++11 threads. 
+	//join() at this point not needed! => how to wait till everyone is ready?
 	_buildkdtree( leftnode,  contained_left, boxMin, split_position_max, level+1  );
 	_buildkdtree( rightnode, contained_right, split_position_min, boxMax, level+1 );
 }
