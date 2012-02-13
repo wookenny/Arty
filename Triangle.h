@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include "AABB-triangle-overlap.h"
 
+
+
 class Triangle: public Obstacle{
 
 	private:
@@ -29,6 +31,7 @@ class Triangle: public Obstacle{
 		}
 
 
+		
 	public:
 		IntersectionCompound getIntersection(const Ray&) const;
 
@@ -48,7 +51,7 @@ class Triangle: public Obstacle{
 
 		void setTextureCoords(std::string coords);
 		bool overlapAABB(const Vector3 &boxMin, const Vector3 &boxMax) const{ 
-					return triBoxOverlap(boxMin,boxMax,this);}
+					return triBoxOverlap(boxMin-Vector3(eps,eps,eps),boxMax+Vector3(eps,eps,eps),this);}
 
 };
 

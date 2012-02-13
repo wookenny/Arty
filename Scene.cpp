@@ -43,7 +43,7 @@ Scene::~Scene(){
 
 void Scene::loadDefaultScene(){
 
-		_eye = Vector3(eps,eps,eps-2);//not (0,0,0) because of rounding errors
+		_eye = Vector3(0,0,-2+eps);//not (0,0,0) because of rounding errors
  		_right = Vector3(1,0,0);
  		_down = Vector3(0,-1,0);
 		_upperLeftCorner = Vector3(-1.,1.,1);
