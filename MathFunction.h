@@ -59,7 +59,7 @@ private:
 	void _compressTree(node<T>*);
 	bool _varInSubTree(node<T>*) const;
 	T _evaluateExpressionTree(node<T> *n,T) const;
-	Operator _smallestOperator(const std::string&) const;
+	std::pair<Operator,size_t> _smallestOperator(const std::string&) const;
 
 public:
 	typedef T type;	
@@ -93,10 +93,13 @@ std::map<Operator,std::string> MathFunction<T>::_opToStr{
 
 
 template <typename T>
-Operator MathFunction<T>::_smallestOperator(const std::string &term) const{
+std::pair<Operator,size_t> MathFunction<T>::_smallestOperator(const std::string &term) const{
 	size_t pos = std::string::npos;
 	int priority = 0;
 	Operator result = Operator::NUM;
+	
+	//run through string, only consider operators with bracket depth == 0
+	//always bigger than 0 => remove a wrapping pair of brackets
 
 	for(auto op: _operatorOrder){
 		//break: found operator with lower priority
@@ -121,7 +124,7 @@ Operator MathFunction<T>::_smallestOperator(const std::string &term) const{
 	//nothing => num
 	if(result==Operator::NUM and term.find(_opToStr[Operator::VAR])!=std::string::npos)
 		 result = Operator::VAR;
-	return result;	
+	return std::make_pair(result,pos);	
 }
 
 
@@ -161,7 +164,8 @@ template <typename T>
 void MathFunction<T>::_buildExpressionTree(node<T> *n,std::string term){
 	//std::cout<<"'"<< term<<"' is parsed" <<std::endl;
 	//which smallest operator in string?
-	Operator op = _smallestOperator(term);
+	auto operation = _smallestOperator(term);
+	Operator op = operation.first;
 	//std::cout<<"found "<<((_opToStr[op]=="")?"number":_opToStr[op])<<std::endl;
 	n->op = op;
 	if(op==Operator::NUM){
@@ -169,7 +173,7 @@ void MathFunction<T>::_buildExpressionTree(node<T> *n,std::string term){
 	}else if(op==Operator::VAR){
 		return;	
 	}else{
-		size_t pos = term.rfind(_opToStr[op]);		
+		size_t pos = operation.second;
 		n->left  = std::move(std::unique_ptr<node<T> >(new node<T>()));
 		_buildExpressionTree(n->left.get(), term.substr(0,pos));
 		n->right = std::move(std::unique_ptr<node<T> >(new node<T>()));

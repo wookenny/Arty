@@ -4,6 +4,7 @@
 #include "MonochromaticTexture.h"
 #include "ImageTexture.h"
 #include "ChessboardTexture.h"
+#include "PerlinTexture.h"
 #include "Obstacle.h"
 #include "Sphere.h"
 #include "Triangle.h"
@@ -249,7 +250,7 @@ void Scene::loadScene(const std::string &xmlfile){
 		std::string name = it->attribute("Name").value();
 		Material tmpmat;
 		if( it->attribute("Color") ){
-			//TODO: get rid of the memory
+			//TODO: get rid of the memory, i.e. unique_ptr
 			Texture *tex = new MonochromaticTexture(Color(it->attribute("Color").value()));
 			tmpmat.setTexture(tex);
 		}
@@ -260,13 +261,16 @@ void Scene::loadScene(const std::string &xmlfile){
 		if( it->attribute("Reflection") )
 			tmpmat.setReflection(it->attribute("Reflection").as_float());
 		if( it->attribute("Texture") ){
-			//TODO get rid of memory
+			//TODO get rid of memory, i.e. unique_ptr
 			Texture *tex = new ImageTexture(path + it->attribute("Texture").value());
 			tmpmat.setTexture(tex);
 		}
 		if( it->attribute("ProceduralTexture") ){
 			if(it->attribute("ProceduralTexture").value()== std::string("chessboard")){
 				Texture *tex = new ChessboardTexture( it->attribute("Params").value() );
+				tmpmat.setTexture(tex);
+			}else if(it->attribute("ProceduralTexture").value()== std::string("perlin")){
+				Texture *tex = new PerlinTexture( it->attribute("Params").value() );
 				tmpmat.setTexture(tex);
 			}
 
@@ -308,6 +312,44 @@ void Scene::loadScene(const std::string &xmlfile){
 
 		if( it->attribute("TextureCoords") )
 			t.setTextureCoords(it->attribute("TextureCoords").value());
+		
+		//_objects.push_back(t);
+		_kd_tree.addTriangle(t);
+	}
+	
+	//get quads
+	child = doc.child("Scene").child("Geometry").child("Quads");
+	for (pugi::xml_node_iterator it = child.begin(); it != child.end(); ++it){
+		//first triangle
+		std::string name = it->attribute("Name").value();
+
+		Triangle t( 	_vertices[it->attribute("A").value()],
+				_vertices[it->attribute("B").value()],
+				_vertices[it->attribute("C").value()]);
+		t.setMaterial(&_materials[ it->attribute("Material").value() ]);
+
+		if( it->attribute("TextureCoords") )
+			t.setTextureCoords(it->attribute("TextureCoords").value());
+		
+		//_objects.push_back(t);
+		_kd_tree.addTriangle(t);
+
+		//second triangle
+		name = it->attribute("Name").value();
+
+		t = Triangle( 	_vertices[it->attribute("A").value()],
+				_vertices[it->attribute("C").value()],
+				_vertices[it->attribute("D").value()]);
+		t.setMaterial(&_materials[ it->attribute("Material").value() ]);
+
+		if( it->attribute("TextureCoords") ){
+			std::string texcoords = it->attribute("TextureCoords").value();
+			
+			std::vector<std::string> coords = split(texcoords,' ');	
+			if(coords.size() != 8)
+				std::cerr<<"Warning: texture coordinates not right"<<it->attribute("TextureCoords").value()<<std::endl;
+			t.setTextureCoords(""+coords[0]+" "+coords[1]+" "+coords[4]+" "+coords[5]+" "+coords[6]+" "+coords[7]);
+		}
 		
 		//_objects.push_back(t);
 		_kd_tree.addTriangle(t);

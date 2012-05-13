@@ -7,7 +7,6 @@ project(Arty)
 set(CMAKE_CXX_FLAGS "-g -Wall -fopenmp -DN_DEBUG -mfpmath=sse -O3 -m64 -pipe -fmessage-length=0 -D_FORTIFY_SOURCE=2 -fstack-protector -funwind-tables -fasynchronous-unwind-tables -D_REENTRANT -lz -lpng -DNO_FREETYPE -Wno-write-strings -std=c++0x")
 set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS " -lz -lpng -pthread")
 
-
 # collect all sources (copy from 'ls -1 *.cpp')
 SET(ArtySources
 AABB-triangle-overlap.cpp
@@ -28,6 +27,7 @@ Lightsource.cpp
 Main.cpp
 Material.h
 Obstacle.h
+PerlinNoise.cpp
 pngwriter.cpp
 pngwriter.h
 pugiconfig.hpp

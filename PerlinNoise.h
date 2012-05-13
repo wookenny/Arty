@@ -27,10 +27,12 @@ public:
   void SetOctaves(    int    _octaves)     { octaves = _octaves;         }
   void SetRandomSeed( int    _randomseed)  { randomseed = _randomseed;   }
 
+  // Get the noise value
+  double GetValue(double x, double y) const;		
+
 private:
 
     double Total(double i, double j) const;
-    double GetValue(double x, double y) const;
     double Interpolate(double x, double y, double a) const;
     double Noise(int x, int y) const;
     double persistence, frequency, amplitude;
