@@ -5,7 +5,7 @@ project(Arty)
 
 #specific compiler settings
 set(CMAKE_CXX_FLAGS "-g -Wall -fopenmp -DN_DEBUG -mfpmath=sse -O3 -m64 -pipe -fmessage-length=0 -D_FORTIFY_SOURCE=2 -fstack-protector -funwind-tables -fasynchronous-unwind-tables -D_REENTRANT -lz -lpng -DNO_FREETYPE -Wno-write-strings -std=c++0x")
-set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS " -lz -lpng -pthread")
+set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS " -lz -lpng -pthread -lgtest -lgtest_main")
 
 # collect all sources (copy from 'ls -1 *.cpp')
 SET(ArtySources
@@ -28,6 +28,8 @@ Main.cpp
 Material.h
 Obstacle.h
 PerlinNoise.cpp
+PerlinNoise.h
+PerlinTexture.h
 pngwriter.cpp
 pngwriter.h
 pugiconfig.hpp
@@ -47,6 +49,11 @@ Vector3.cpp
 Vector3.h
 )
 
+# collect all sources
+SET(GTestSources
+MathFunction_unittest.cpp
+)
+
 # display status message for important variables
 MESSAGE( STATUS )
 MESSAGE( STATUS "-------------------------------------------------------------------------------" )
@@ -57,4 +64,4 @@ MESSAGE( STATUS )
 
 #define executable
 ADD_EXECUTABLE(Arty ${ArtySources} )
-
+ADD_EXECUTABLE(GTests ${GTestSources} )

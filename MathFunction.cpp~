@@ -11,7 +11,7 @@ int main(int args, char **argv ){
 
 	MathFunction<double> f{term};
 
-	std::cout<<f(x)<<std::endl;
+	std::cout<<f.evaluate(x)<<std::endl;
 
 }
 

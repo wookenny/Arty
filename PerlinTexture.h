@@ -14,7 +14,7 @@ class PerlinTexture: public Texture{
 					_X(x),_Y(y),_Z(z),noiseRed(p,f,a,o,r),
 					noiseGreen(p,f,a,o,r+1),noiseBlue(p,f,a,o,r+2){} 
 
-		PerlinTexture(std::string s):_X(10),_Y(10),_Z(10){
+		PerlinTexture(std::string s):_X(500),_Y(500),_Z(500){
 				std::vector<std::string> v = split(s, ';');
 				if(v.size() >0)  _X = std::stoi(v[0]);
 				if(v.size() >1)  _Y = std::stoi(v[1]);
@@ -27,9 +27,9 @@ class PerlinTexture: public Texture{
 				if(v.size() >5) a = std::stod(v[5]);
 				if(v.size() >6) o = std::stoi(v[6]);
 				if(v.size() >7) r = std::stod(v[7]);
-				noiseRed = PerlinNoise(p,f,a,o,r);
-				noiseGreen = PerlinNoise(p,f,a,o,r+1);
-				noiseBlue = PerlinNoise(p,f,a,o,r+2);
+				noiseRed =   PerlinNoise(p,f,a,o,r);
+				noiseGreen = PerlinNoise(p,f,a,o,r+1000);
+				noiseBlue =  PerlinNoise(p,f,a,o,r+2000);
 		}
 
 
@@ -40,9 +40,9 @@ class PerlinTexture: public Texture{
 			//scale ewverything correctly
 			//2D or 3D texture?
 			//multipoly with X,Y,Z -> correct request/query
-			return Color(   noiseRed.GetValue(ic.px,ic.py),
-					noiseGreen.GetValue(ic.px,ic.py),
-					noiseBlue.GetValue(ic.px,ic.py) );
+			return Color(   noiseRed.GetValue(_X*ic.px,_Y*ic.py),
+					noiseGreen.GetValue(_X*ic.px,_Y*ic.py),
+					noiseBlue.GetValue(_X*ic.px,_Y*ic.py) );
 		};
   
 	private:
