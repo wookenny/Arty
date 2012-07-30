@@ -13,6 +13,9 @@ int main(int args, char **argv ){
 
 	std::cout<<f(x)<<std::endl;
 
+
+
+	f.test();
 }
 
 

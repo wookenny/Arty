@@ -9,6 +9,7 @@
 #include <map>
 #include <utility>
 #include <cmath>
+#include <tuple>
 #include <algorithm>
 #include "boost/lexical_cast.hpp" 
 
@@ -42,6 +43,7 @@ struct node{
 	
 };
 
+
 //whole class
 template <typename T>
 class MathFunction{
@@ -49,6 +51,7 @@ class MathFunction{
 private:
 	
 	static std::multimap<int, std::string> _operatorOrder;
+	static std::unordered_map<std::string, int> _operatorPriority;
 	static std::unordered_map<std::string,Operator> _strToOp;
 	static std::map<Operator,std::string> _opToStr;
 
@@ -59,20 +62,32 @@ private:
 	void _compressTree(node<T>*);
 	bool _varInSubTree(node<T>*) const;
 	T _evaluateExpressionTree(node<T> *n,T) const;
+	
+	std::tuple<std::string, Operator, std::string>  _splitTerm(const std::string &) const;
 	std::pair<Operator,size_t> _smallestOperator(const std::string&) const;
 
 public:
 	typedef T type;	
 
+
+	void test();
 	MathFunction(std::string);
 	T evaluate(T) const;
 		
 	T operator()(T v) const { return _evaluateExpressionTree(_expression_root.get(),v);}
 };
 
+
+
+
+
+
 //init of the static variable
 template<typename T>
 std::multimap<int, std::string> MathFunction<T>::_operatorOrder{{1,"+"},{1,"-"},{2,"*"},{2,"/"},{3,"^"}}; 
+
+template<typename T>
+std::unordered_map<std::string, int> MathFunction<T>::_operatorPriority{{"+",1},{"-",1},{"*",2},{"/",2},{"^",3}}; 
 
 template<typename T>
 std::unordered_map<std::string,Operator> MathFunction<T>::_strToOp{
@@ -82,7 +97,7 @@ std::unordered_map<std::string,Operator> MathFunction<T>::_strToOp{
 									{"/",Operator::DIV},
 									{"^",Operator::POW},
 									{"x",Operator::VAR}};
-template<typename T>
+template<typename T> 
 std::map<Operator,std::string> MathFunction<T>::_opToStr{
 									{Operator::ADD,"+"},
 									{Operator::SUB,"-"},
@@ -92,6 +107,62 @@ std::map<Operator,std::string> MathFunction<T>::_opToStr{
 									{Operator::VAR,"x"}};
 
 
+template <typename T> 
+std::tuple<std::string, Operator, std::string>  MathFunction<T>::_splitTerm(const std::string &term) const{
+	
+	//search from tail to head for the operator with the smallest priority, which is not inside a braket 
+	int pos = term.size()-1;
+	int priority = 0;
+	Operator result = Operator::NUM;
+	bool operator_found = false;
+	int splitpos = -1;	
+	int bracket_level = 0;
+	while(pos >= 0){
+		if(term[pos]==')'){
+			++bracket_level;
+			std::cout<<"bracketlevel: "<<bracket_level<<std::endl;
+		}else if(term[pos]=='('){
+			--bracket_level;
+			std::cout<<"bracketlevel: "<<bracket_level<<std::endl;
+		}
+
+		// inside a braket?
+		if(bracket_level>0){		
+			--pos;
+			continue;
+		}
+		
+		std::string t = term.substr(pos,1);
+		std::cout<<"checking: "<<t<<std::endl;
+		auto op = _strToOp.find(t);
+		if(op != _strToOp.end()){
+			std::cout<< "found: "<<t<<std::endl;
+			auto found_op = op->second;
+			if( _operatorPriority[t] > priority ){
+				 priority = _operatorPriority[t];
+				 result = found_op;
+				 operator_found = true;
+				 splitpos = pos;
+			}
+		}
+		--pos;
+	}			
+	
+	//end of string and nothing found? => remove outer brakets
+	if(not operator_found){
+		if(term[0]=='(' and term[term.size()-1]==')')
+				return _splitTerm(term.substr(1,term.size()-2));
+			else
+				return std::make_tuple(term,Operator::NUM,term);
+
+	}else{
+		std::cout<< "pos: "<<splitpos<<std::endl;
+		return std::make_tuple(term.substr(0,splitpos),result,term.substr(splitpos+1,term.size()-splitpos));
+	}
+}
+
+ 
+ 
 template <typename T>
 std::pair<Operator,size_t> MathFunction<T>::_smallestOperator(const std::string &term) const{
 	size_t pos = std::string::npos;
@@ -155,8 +226,7 @@ void MathFunction<T>::_compressTree(node<T> *n){
 	
 	_compressTree(n->left.get());
 	_compressTree(n->right.get());				
-			  
-	
+
 }
 
 
@@ -165,6 +235,8 @@ void MathFunction<T>::_buildExpressionTree(node<T> *n,std::string term){
 	//std::cout<<"'"<< term<<"' is parsed" <<std::endl;
 	//which smallest operator in string?
 	auto operation = _smallestOperator(term);
+	
+	
 	Operator op = operation.first;
 	//std::cout<<"found "<<((_opToStr[op]=="")?"number":_opToStr[op])<<std::endl;
 	n->op = op;
@@ -232,3 +304,18 @@ T MathFunction<T>::evaluate(T t) const{
 	return res;
 }
 
+
+template <typename T>
+void MathFunction<T>::test(){
+	std::string s = "(((4*3)+(3+4)))";
+	std::tuple<std::string, Operator, std::string> result = _splitTerm(s);
+	std::cout<<"splitting: "<<s<<std::endl;
+		
+	std::cout<< "result: '"
+				<< std::get<0>(result) 
+				<< "' "
+				<< _opToStr[std::get<1>(result)] 
+				<< " '" 
+				<< std::get<2>(result)
+				<< "'" <<std::endl;
+}
